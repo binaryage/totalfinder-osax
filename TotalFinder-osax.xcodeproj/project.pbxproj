@@ -180,8 +180,7 @@
 				GCC_PREFIX_HEADER = "$(SYSTEM_LIBRARY_DIR)/Frameworks/AppKit.framework/Headers/AppKit.h";
 				GCC_VERSION = com.apple.compilers.llvmgcc42;
 				INFOPLIST_FILE = Info.plist;
-				INSTALL_PATH = "$(HOME)/Library/Bundles";
-				ONLY_ACTIVE_ARCH = YES;
+				ONLY_ACTIVE_ARCH = NO;
 				OTHER_LDFLAGS = (
 					"-framework",
 					Foundation,
@@ -190,6 +189,7 @@
 				);
 				PREBINDING = NO;
 				PRODUCT_NAME = TotalFinder;
+				SKIP_INSTALL = YES;
 				WRAPPER_EXTENSION = osax;
 			};
 			name = Debug;
