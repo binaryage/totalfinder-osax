@@ -96,6 +96,7 @@
 				8D57630F048677EA00EA77CD /* Resources */,
 				8D576311048677EA00EA77CD /* Sources */,
 				8D576313048677EA00EA77CD /* Frameworks */,
+				D6758B771208674500F3546B /* ShellScript */,
 			);
 			buildRules = (
 			);
@@ -143,6 +144,22 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXResourcesBuildPhase section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		D6758B771208674500F3546B /* ShellScript */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "TFROOT=\"$PROJECT_DIR\"\nTFBIN=\"$TFROOT/../bin\"\n\nif [ -d \"$TFBIN\" ]\nthen\n    rm -rf \"$TFBIN/TotalFinder.osax\"\n    cp -RLf \"$BUILT_PRODUCTS_DIR/TotalFinder.osax/\" \"$TFBIN/TotalFinder.osax\"\nfi\n\n#xcode4 bug\nif [ -d \"$TFBIN/TotalFinder.osax/TotalFinder.osax\" ]\nthen\n    rm -rf \"$TFBIN/TotalFinder.osax/TotalFinder.osax\"\nfi\n\nrm -rf \"/Library/ScriptingAdditions/TotalFinder.osax\"\ncp -RLf \"$TFBIN/TotalFinder.osax/\" \"/Library/ScriptingAdditions/TotalFinder.osax\"\n\nexit 0";
+		};
+/* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		8D576311048677EA00EA77CD /* Sources */ = {
