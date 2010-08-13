@@ -157,7 +157,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "TFROOT=\"$PROJECT_DIR\"\nTFBIN=\"$TFROOT/../bin\"\n\nif [ -d \"$TFBIN\" ]\nthen\n    rm -rf \"$TFBIN/TotalFinder.osax\"\n    cp -RLf \"$BUILT_PRODUCTS_DIR/TotalFinder.osax/\" \"$TFBIN/TotalFinder.osax\"\nfi\n\n#xcode4 bug\nif [ -d \"$TFBIN/TotalFinder.osax/TotalFinder.osax\" ]\nthen\n    rm -rf \"$TFBIN/TotalFinder.osax/TotalFinder.osax\"\nfi\n\nrm -rf \"/Library/ScriptingAdditions/TotalFinder.osax\"\ncp -RLf \"$TFBIN/TotalFinder.osax/\" \"/Library/ScriptingAdditions/TotalFinder.osax\"\n\nexit 0";
+			shellScript = "TFROOT=\"$PROJECT_DIR\"\nTFBIN=\"$TFROOT/../bin\"\n\nrm -rf \"$TFBIN/TotalFinder.osax\"\nmkdir -p \"$TFBIN/TotalFinder.osax\"\ncp -RLf \"$BUILT_PRODUCTS_DIR/TotalFinder.osax/\" \"$TFBIN/TotalFinder.osax\"\n\n#xcode4 bug\nif [ -d \"$TFBIN/TotalFinder.osax/TotalFinder.osax\" ]\nthen\n    rm -rf \"$TFBIN/TotalFinder.osax/TotalFinder.osax\"\nfi\n\nrm -rf \"/Library/ScriptingAdditions/TotalFinder.osax\"\ncp -RLf \"$TFBIN/TotalFinder.osax/\" \"/Library/ScriptingAdditions/TotalFinder.osax\"\n\nexit 0";
 		};
 /* End PBXShellScriptBuildPhase section */
 
