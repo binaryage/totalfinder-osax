@@ -2,7 +2,7 @@
 
 #define TOTALFINDER_PLUGIN_PATH @"/Applications/TotalFinder.app/Contents/Resources/TotalFinder.bundle"
 #define FINDER_MIN_ALLOWED_VERSION @"10.6"
-#define FINDER_MAX_ALLOWED_VERSION @"10.6.5"
+#define FINDER_MAX_ALLOWED_VERSION @"10.6.6"
 
 // SIMBL-compatible interface
 @interface TotalFinderPlugin: NSObject { 
