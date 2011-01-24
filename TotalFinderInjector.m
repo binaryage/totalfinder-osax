@@ -1,8 +1,8 @@
 #import "TFStandardVersionComparator.h"
 
 #define TOTALFINDER_PLUGIN_PATH @"/Applications/TotalFinder.app/Contents/Resources/TotalFinder.bundle"
-#define FINDER_MIN_ALLOWED_VERSION @"10.6"
-#define FINDER_MAX_ALLOWED_VERSION @"10.6.7"
+#define FINDER_MIN_TESTED_VERSION @"10.6"
+#define FINDER_MAX_TESTED_VERSION @"10.6.7"
 
 // SIMBL-compatible interface
 @interface TotalFinderPlugin: NSObject { 
@@ -36,12 +36,12 @@ OSErr HandleInitEvent(const AppleEvent *ev, AppleEvent *reply, long refcon) {
         NSUserDefaults* defaults = [NSUserDefaults standardUserDefaults];
         if (![defaults boolForKey:supressKey]) {
             TFStandardVersionComparator* comparator = [TFStandardVersionComparator defaultComparator];
-            if (([comparator compareVersion:finderVersion toVersion:FINDER_MAX_ALLOWED_VERSION]==NSOrderedDescending) || 
-                ([comparator compareVersion:finderVersion toVersion:FINDER_MIN_ALLOWED_VERSION]==NSOrderedAscending)) {
+            if (([comparator compareVersion:finderVersion toVersion:FINDER_MAX_TESTED_VERSION]==NSOrderedDescending) || 
+                ([comparator compareVersion:finderVersion toVersion:FINDER_MIN_TESTED_VERSION]==NSOrderedAscending)) {
 
                 NSAlert* alert = [NSAlert new];
                 [alert setMessageText: [NSString stringWithFormat:@"You have Finder version %@", finderVersion]];
-                [alert setInformativeText: [NSString stringWithFormat:@"But TotalFinder was properly tested only with Finder versions in range %@ - %@\n\nYou have probably updated your system and Finder version got bumped by Apple developers.\n\nYou may expect a new TotalFinder release soon.", FINDER_MIN_ALLOWED_VERSION, FINDER_MAX_ALLOWED_VERSION]];
+                [alert setInformativeText: [NSString stringWithFormat:@"But TotalFinder was properly tested only with Finder versions in range %@ - %@\n\nYou have probably updated your system and Finder version got bumped by Apple developers.\n\nYou may expect a new TotalFinder release soon.", FINDER_MIN_TESTED_VERSION, FINDER_MAX_TESTED_VERSION]];
                 [alert setShowsSuppressionButton:YES];
                 [alert addButtonWithTitle:@"Launch TotalFinder anyway"];
                 [alert addButtonWithTitle:@"Cancel"];
