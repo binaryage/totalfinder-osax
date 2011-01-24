@@ -1,6 +1,6 @@
 #import "TFStandardVersionComparator.h"
 
-#define TOTALFINDER_PLUGIN_PATH @"/Applications/TotalFinder.app/Contents/Resources/TotalFinder.bundle"
+#define TOTALFINDER_STANDARD_INSTALL_LOCATION @"/Applications/TotalFinder.app"
 #define FINDER_MIN_TESTED_VERSION @"10.6"
 #define FINDER_MAX_TESTED_VERSION @"10.6.7"
 
@@ -10,10 +10,12 @@
 - (void) install;
 @end
 
+NSString* findUsingSpotlight(NSString* query, NSArray* scopes);
+
 static bool alreadyLoaded = false;
 
 OSErr HandleInitEvent(const AppleEvent *ev, AppleEvent *reply, long refcon) {
-    NSLog(@"TotalFinderInjector: got init request");
+    NSLog(@"TotalFinderInjector: Received init request");
     if (alreadyLoaded) {
         NSLog(@"TotalFinderInjector: TotalFinder has been already loaded. Ignoring this request.");
         return noErr;
@@ -55,9 +57,29 @@ OSErr HandleInitEvent(const AppleEvent *ev, AppleEvent *reply, long refcon) {
             }
         }
         
-        NSBundle* pluginBundle = [NSBundle bundleWithPath:TOTALFINDER_PLUGIN_PATH];
+        NSString* totalFinderLocation = TOTALFINDER_STANDARD_INSTALL_LOCATION;
+        NSFileManager *fm = [NSFileManager defaultManager];
+        BOOL isDirectory = NO;
+        BOOL presentAtStandardLocation = [fm fileExistsAtPath:totalFinderLocation isDirectory:&isDirectory];
+        if (!(presentAtStandardLocation && isDirectory)) {
+            // to test this query, run this on commandline:
+            // > mdfind "kMDItemFSName == 'TotalFinder.app' and kMDItemKind == 'Application'"
+            NSString* query = @"kMDItemFSName == 'TotalFinder.app' and kMDItemKind == 'Application'";
+            NSArray* scopes = [NSArray arrayWithObjects:@"/Applications/", [@"~/Applications/" stringByExpandingTildeInPath], nil];
+            totalFinderLocation = findUsingSpotlight(query, scopes); // try to look in Applications first
+            if (!totalFinderLocation) {
+                totalFinderLocation = findUsingSpotlight(query, nil); // full scope
+                if (!totalFinderLocation) {
+                    NSLog(@"TotalFinderInjector: Unable to locate TotalFinder using Spotlight");
+                    return 6;
+                }
+            } 
+            NSLog(@"TotalFinderInjector: TotalFinder.app detected at non-standard location '%@'. When uninstalling you will have to remove it manually!", totalFinderLocation);
+        }
+        
+        NSBundle* pluginBundle = [NSBundle bundleWithPath:[totalFinderLocation stringByAppendingPathComponent:@"Contents/Resources/TotalFinder.bundle"]];
         if (!pluginBundle) {
-            NSLog(@"TotalFinderInjector: Unable to load bundle from path: %@", TOTALFINDER_PLUGIN_PATH);
+            NSLog(@"TotalFinderInjector: Unable to load bundle from path: %@", totalFinderLocation);
             return 2;
         }
         TotalFinderPlugin* principalClass = (TotalFinderPlugin*)[pluginBundle principalClass];
@@ -75,4 +97,37 @@ OSErr HandleInitEvent(const AppleEvent *ev, AppleEvent *reply, long refcon) {
         NSLog(@"TotalFinderInjector: Failed to load TotalFinder with exception: %@", exception);
     }
     return 1;
+}
+
+NSString* findUsingSpotlight(NSString* query, NSArray* scopes) {
+    NSMetadataQuery* q = [[NSMetadataQuery alloc] init];
+    [q setPredicate:[NSPredicate predicateWithFormat:query, nil]];
+    if (scopes) {
+        [q setSearchScopes:scopes];
+    }
+    
+    if ([q startQuery]) {
+        while ([q isGathering]) {
+            if ([q resultCount]) { // wait just for the first result
+                break;
+            }
+            [[NSRunLoop currentRunLoop] runUntilDate:[NSDate dateWithTimeIntervalSinceNow:0.1]];
+        }
+        [q stopQuery];
+    }
+    
+    if (![q resultCount]) {
+        return nil;
+    }
+    
+    NSMetadataItem* result = [q resultAtIndex:0];
+    if (!result) {
+        return nil;
+    }
+    
+    NSString* path = [result valueForAttribute:(NSString*)kMDItemPath];
+
+    [q release];
+    
+    return path;
 }
