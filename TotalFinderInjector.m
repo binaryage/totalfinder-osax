@@ -2,7 +2,7 @@
 
 #define TOTALFINDER_STANDARD_INSTALL_LOCATION @"/Applications/TotalFinder.app"
 #define FINDER_MIN_TESTED_VERSION @"10.6"
-#define FINDER_MAX_TESTED_VERSION @"10.6.7"
+#define FINDER_MAX_TESTED_VERSION @"10.6.8"
 
 // SIMBL-compatible interface
 @interface TotalFinderPlugin: NSObject { 
