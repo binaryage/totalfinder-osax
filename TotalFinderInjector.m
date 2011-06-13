@@ -20,6 +20,22 @@ typedef struct {
     NSString* location;
 } configuration;
 
+OSErr AEPutParamString(AppleEvent *event, AEKeyword keyword, NSString* string) {
+    UInt8 *textBuf;
+    CFIndex length, maxBytes, actualBytes;
+    length = CFStringGetLength((CFStringRef)string);
+    maxBytes = CFStringGetMaximumSizeForEncoding(length, kCFStringEncodingUTF8);
+    textBuf = malloc(maxBytes);
+    if (textBuf) {
+        CFStringGetBytes((CFStringRef)string, CFRangeMake(0, length), kCFStringEncodingUTF8, 0, true, (UInt8 *)textBuf, maxBytes, &actualBytes);
+        OSErr err = AEPutParamPtr(event, keyword, typeUTF8Text, textBuf, actualBytes);
+        free(textBuf);
+        return err;
+    } else {
+        return memFullErr;
+    }
+}
+
 static int ini_handler(void* user, const char* section, const char* name, const char* value) {
     configuration* config = (configuration*)user;
     
@@ -27,6 +43,11 @@ static int ini_handler(void* user, const char* section, const char* name, const 
         config->location = [[NSString alloc] initWithUTF8String:value];
     }
     return 0;
+}
+
+static void reportError(AppleEvent *reply, NSString* msg) {
+    NSLog(@"TotalFinderInjector: %@", msg);
+    AEPutParamString(reply, keyErrorString, msg);
 }
 
 OSErr HandleInitEvent(const AppleEvent *ev, AppleEvent *reply, long refcon) {
@@ -38,13 +59,13 @@ OSErr HandleInitEvent(const AppleEvent *ev, AppleEvent *reply, long refcon) {
     @try {
         NSBundle* finderBundle = [NSBundle mainBundle];
         if (!finderBundle) {
-            NSLog(@"TotalFinderInjector: Unable to locate main Finder bundle!");
+            reportError(reply, [NSString stringWithFormat:@"Unable to locate main Finder bundle!"]);
             return 4;
         }
         
         NSString* finderVersion = [finderBundle objectForInfoDictionaryKey:@"CFBundleVersion"];
         if (!finderVersion) {
-            NSLog(@"TotalFinderInjector: Unable to determine Finder version!");
+            reportError(reply, [NSString stringWithFormat:@"Unable to determine Finder version!"]);
             return 5;
         }
         
@@ -83,12 +104,19 @@ OSErr HandleInitEvent(const AppleEvent *ev, AppleEvent *reply, long refcon) {
         
         NSBundle* pluginBundle = [NSBundle bundleWithPath:[totalFinderLocation stringByAppendingPathComponent:@"Contents/Resources/TotalFinder.bundle"]];
         if (!pluginBundle) {
-            NSLog(@"TotalFinderInjector: Unable to load bundle from path: %@", totalFinderLocation);
+            reportError(reply, [NSString stringWithFormat:@"Unable to create bundle from path: %@", totalFinderLocation]);
             return 2;
         }
+        
+        NSError* error;
+        if (![pluginBundle loadAndReturnError:&error]) {
+            reportError(reply, [NSString stringWithFormat:@"Unable to load bundle from path: %@ error: %@", totalFinderLocation, [error localizedDescription]]);
+            return 6;
+        }
+        
         TotalFinderPlugin* principalClass = (TotalFinderPlugin*)[pluginBundle principalClass];
         if (!principalClass) {
-            NSLog(@"TotalFinderInjector: Unable to retrieve principalClass for bundle: %@", pluginBundle);
+            reportError(reply, [NSString stringWithFormat:@"Unable to retrieve principalClass for bundle: %@", pluginBundle]);
             return 3;
         }
         if ([principalClass respondsToSelector:@selector(install)]) {
@@ -98,7 +126,7 @@ OSErr HandleInitEvent(const AppleEvent *ev, AppleEvent *reply, long refcon) {
         alreadyLoaded = true;
         return noErr;
     } @catch (NSException* exception) {
-        NSLog(@"TotalFinderInjector: Failed to load TotalFinder with exception: %@", exception);
+        reportError(reply, [NSString stringWithFormat:@"Failed to load TotalFinder with exception: %@", exception]);
     }
     return 1;
 }
