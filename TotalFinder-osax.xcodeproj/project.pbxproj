@@ -96,7 +96,7 @@
 				8D57630F048677EA00EA77CD /* Resources */,
 				8D576311048677EA00EA77CD /* Sources */,
 				8D576313048677EA00EA77CD /* Frameworks */,
-				D6758B771208674500F3546B /* ShellScript */,
+				D6758B771208674500F3546B /* Copy Products into bin */,
 			);
 			buildRules = (
 			);
@@ -146,18 +146,19 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXShellScriptBuildPhase section */
-		D6758B771208674500F3546B /* ShellScript */ = {
+		D6758B771208674500F3546B /* Copy Products into bin */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
 			);
 			inputPaths = (
 			);
+			name = "Copy Products into bin";
 			outputPaths = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "TFROOT=\"$PROJECT_DIR\"\nTFBIN=\"$TFROOT/../bin\"\n\nrm -rf \"$TFBIN/TotalFinder.osax\"\nmkdir -p \"$TFBIN/TotalFinder.osax\"\ncp -RLf \"$BUILT_PRODUCTS_DIR/TotalFinder.osax/\" \"$TFBIN/TotalFinder.osax\"\n\n#xcode4 bug\nif [ -d \"$TFBIN/TotalFinder.osax/TotalFinder.osax\" ]\nthen\n    rm -rf \"$TFBIN/TotalFinder.osax/TotalFinder.osax\"\nfi\n\nrm -rf \"/Library/ScriptingAdditions/TotalFinder.osax\"\ncp -RLf \"$TFBIN/TotalFinder.osax/\" \"/Library/ScriptingAdditions/TotalFinder.osax\"\n\nexit 0";
+			shellScript = "BIN=\"$PROJECT_DIR/bin\"\n\nrm -rf \"$BIN/TotalFinder.osax\"\nmkdir -p \"$BIN/TotalFinder.osax\"\ncp -r \"$BUILT_PRODUCTS_DIR/TotalFinder.osax\" \"$BIN\"";
 		};
 /* End PBXShellScriptBuildPhase section */
 
