@@ -12,6 +12,7 @@
 		D6ACBEA2117B7D5600F6691C /* TotalFinderInjector.m in Sources */ = {isa = PBXBuildFile; fileRef = D6ACBE9E117B7D5600F6691C /* TotalFinderInjector.m */; };
 		D6ACBEA3117B7D5600F6691C /* TFStandardVersionComparator.m in Sources */ = {isa = PBXBuildFile; fileRef = D6ACBEA0117B7D5600F6691C /* TFStandardVersionComparator.m */; };
 		D6ACBEA5117B7D6100F6691C /* TotalFinderInjector.sdef in Resources */ = {isa = PBXBuildFile; fileRef = D6ACBEA4117B7D6100F6691C /* TotalFinderInjector.sdef */; };
+		D6E8457113A6748200D2D64A /* ini.c in Sources */ = {isa = PBXBuildFile; fileRef = D6E8456F13A6748200D2D64A /* ini.c */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -24,6 +25,8 @@
 		D6ACBEA0117B7D5600F6691C /* TFStandardVersionComparator.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TFStandardVersionComparator.m; sourceTree = "<group>"; };
 		D6ACBEA1117B7D5600F6691C /* TFStandardVersionComparator.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TFStandardVersionComparator.h; sourceTree = "<group>"; };
 		D6ACBEA4117B7D6100F6691C /* TotalFinderInjector.sdef */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; path = TotalFinderInjector.sdef; sourceTree = "<group>"; };
+		D6E8456F13A6748200D2D64A /* ini.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = ini.c; path = ini/ini.c; sourceTree = "<group>"; };
+		D6E8457013A6748200D2D64A /* ini.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ini.h; path = ini/ini.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -70,6 +73,7 @@
 		08FB77AFFE84173DC02AAC07 /* Source */ = {
 			isa = PBXGroup;
 			children = (
+				D6E8456E13A672DF00D2D64A /* ini */,
 				D6ACBE9E117B7D5600F6691C /* TotalFinderInjector.m */,
 				D6ACBE9F117B7D5600F6691C /* TFVersionComparisonProtocol.h */,
 				D6ACBEA0117B7D5600F6691C /* TFStandardVersionComparator.m */,
@@ -84,6 +88,15 @@
 				8D576316048677EA00EA77CD /* TotalFinder.osax */,
 			);
 			name = Products;
+			sourceTree = "<group>";
+		};
+		D6E8456E13A672DF00D2D64A /* ini */ = {
+			isa = PBXGroup;
+			children = (
+				D6E8456F13A6748200D2D64A /* ini.c */,
+				D6E8457013A6748200D2D64A /* ini.h */,
+			);
+			name = ini;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -169,6 +182,7 @@
 			files = (
 				D6ACBEA2117B7D5600F6691C /* TotalFinderInjector.m in Sources */,
 				D6ACBEA3117B7D5600F6691C /* TFStandardVersionComparator.m in Sources */,
+				D6E8457113A6748200D2D64A /* ini.c in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -194,8 +208,6 @@
 				GCC_ENABLE_FIX_AND_CONTINUE = YES;
 				GCC_MODEL_TUNING = G5;
 				GCC_OPTIMIZATION_LEVEL = 0;
-				GCC_PRECOMPILE_PREFIX_HEADER = YES;
-				GCC_PREFIX_HEADER = "$(SYSTEM_LIBRARY_DIR)/Frameworks/AppKit.framework/Headers/AppKit.h";
 				INFOPLIST_FILE = Info.plist;
 				ONLY_ACTIVE_ARCH = NO;
 				OTHER_LDFLAGS = (
@@ -217,8 +229,6 @@
 				COPY_PHASE_STRIP = YES;
 				GCC_ENABLE_FIX_AND_CONTINUE = NO;
 				GCC_MODEL_TUNING = G5;
-				GCC_PRECOMPILE_PREFIX_HEADER = YES;
-				GCC_PREFIX_HEADER = "$(SYSTEM_LIBRARY_DIR)/Frameworks/AppKit.framework/Headers/AppKit.h";
 				INFOPLIST_FILE = Info.plist;
 				OTHER_LDFLAGS = (
 					"-framework",

@@ -6,7 +6,7 @@
 //  Copyright 2007 Andy Matuschak. All rights reserved.
 //
 
-// #import "Sparkle.h"
+#import <Cocoa/Cocoa.h>
 #import "TFStandardVersionComparator.h"
 
 @implementation TFStandardVersionComparator

@@ -1,6 +1,10 @@
-#import "TFStandardVersionComparator.h"
+#import <Cocoa/Cocoa.h>
 
-#define TOTALFINDER_STANDARD_INSTALL_LOCATION @"/Applications/TotalFinder.app"
+#import "TFStandardVersionComparator.h"
+#import "ini.h"
+
+#define TOTALFINDER_STANDARD_INSTALL_LOCATION "/Applications/TotalFinder.app"
+#define TOTALFINDER_INI_FILE "~/.totalfinder"
 #define FINDER_MIN_TESTED_VERSION @"10.6"
 #define FINDER_MAX_TESTED_VERSION @"10.6.8"
 
@@ -11,6 +15,19 @@
 @end
 
 static bool alreadyLoaded = false;
+
+typedef struct {
+    NSString* location;
+} configuration;
+
+static int ini_handler(void* user, const char* section, const char* name, const char* value) {
+    configuration* config = (configuration*)user;
+    
+    if ([[NSString stringWithUTF8String:name] isEqualToString:@"location"]) {
+        config->location = [[NSString alloc] initWithUTF8String:value];
+    }
+    return 0;
+}
 
 OSErr HandleInitEvent(const AppleEvent *ev, AppleEvent *reply, long refcon) {
     NSLog(@"TotalFinderInjector: Received init request");
@@ -55,7 +72,14 @@ OSErr HandleInitEvent(const AppleEvent *ev, AppleEvent *reply, long refcon) {
             }
         }
         
-        NSString* totalFinderLocation = TOTALFINDER_STANDARD_INSTALL_LOCATION;
+        // read install location from ini file if present, otherwise use standard install location
+        configuration config;
+        NSString* totalFinderLocation = @TOTALFINDER_STANDARD_INSTALL_LOCATION;
+        NSString* iniPath = [@TOTALFINDER_INI_FILE stringByExpandingTildeInPath];
+        if (ini_parse([iniPath cStringUsingEncoding:NSASCIIStringEncoding], ini_handler, &config) >= 0) {
+            totalFinderLocation = [config.location stringByStandardizingPath];
+            [config.location release];
+        }
         
         NSBundle* pluginBundle = [NSBundle bundleWithPath:[totalFinderLocation stringByAppendingPathComponent:@"Contents/Resources/TotalFinder.bundle"]];
         if (!pluginBundle) {
