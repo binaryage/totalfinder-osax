@@ -17,9 +17,10 @@ You may want to read the article about my motivations:
 
 ## BATFinit event
 
-Installs TotalFinder.bundle into running Finder.app
+Installs TotalFinder.bundle into running Finder.app (/Applications/TotalFinder.app is just a wrapper app for this script)
 
     tell application "Finder"
+        -- give Finder some time to launch if it wasn't running (rare case)
         delay 1 -- this delay is important to prevent random "Connection is Invalid -609" AppleScript errors 
         try
             «event BATFinit»
@@ -28,4 +29,20 @@ Installs TotalFinder.bundle into running Finder.app
         end try
     end tell
 
+## BATFchck event
+
+Check if TotalFinder is present in running Finder image.
+
+    tell application "Finder"
+        -- give Finder some time to launch if it wasn't running (rare case)
+        delay 1 -- this delay is important to prevent random "Connection is Invalid -609" AppleScript errors 
+        try
+            «event BATFchck»
+            set res to "present"
+        on error msg number num
+            set res to "not present"
+        end try
+        res
+    end tell
+    
 #### License: [MIT-Style](totalfinder-osax/raw/master/license.txt)

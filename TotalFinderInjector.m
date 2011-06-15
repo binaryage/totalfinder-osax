@@ -51,7 +51,7 @@ static void reportError(AppleEvent *reply, NSString* msg) {
 }
 
 OSErr HandleInitEvent(const AppleEvent *ev, AppleEvent *reply, long refcon) {
-    NSLog(@"TotalFinderInjector: Received init request");
+    NSLog(@"TotalFinderInjector: Received init event");
     if (alreadyLoaded) {
         NSLog(@"TotalFinderInjector: TotalFinder has been already loaded. Ignoring this request.");
         return noErr;
@@ -128,5 +128,13 @@ OSErr HandleInitEvent(const AppleEvent *ev, AppleEvent *reply, long refcon) {
     } @catch (NSException* exception) {
         reportError(reply, [NSString stringWithFormat:@"Failed to load TotalFinder with exception: %@", exception]);
     }
+    return 1;
+}
+
+OSErr HandleCheckEvent(const AppleEvent *ev, AppleEvent *reply, long refcon) {
+    if (alreadyLoaded) {
+        return noErr;
+    }
+    reportError(reply, @"TotalFinder not loaded");
     return 1;
 }

@@ -35,6 +35,15 @@
 				<key>Context</key>
 				<string>Process</string>
 			</dict>
+			<key>BATFchck</key>
+			<dict>
+				<key>Handler</key>
+				<string>HandleCheckEvent</string>
+				<key>ThreadSafe</key>
+				<false/>
+				<key>Context</key>
+				<string>Process</string>
+			</dict>
 		</dict>
 	</dict>
 </dict>
