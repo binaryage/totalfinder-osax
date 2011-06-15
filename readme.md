@@ -4,9 +4,9 @@ This source code implements scripting additions used by [TotalFinder](http://tot
 
 **TotalFinder** is a plugin for Apples's Finder.app which brings tabs, dual panels and more!
 
-<img src="http://totalfinder.binaryage.com/shared/img/totalfinder-mainshot.png">
+<a href="http://totalfinder.binaryage.com"><img src="http://totalfinder.binaryage.com/shared/img/totalfinder-mainshot.png"></a>
 
-## Visit [totalfinder.binaryage.com](http://totalfinder.binaryage.com)
+### Visit [totalfinder.binaryage.com](http://totalfinder.binaryage.com)
 
 ## Is this a replacement for SIMBL?
 
