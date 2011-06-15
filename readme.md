@@ -44,5 +44,3 @@ Check if TotalFinder is present in running Finder image.
         end try
         res
     end tell
-    
-#### License: [MIT-Style](totalfinder-osax/raw/master/license.txt)
