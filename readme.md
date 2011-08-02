@@ -15,14 +15,6 @@ Yes, this is SIMBL-lite tailored specifically for TotalFinder.
 You may want to read the article about my motivations:
 [http://blog.binaryage.com/totalfinder-without-simbl](http://blog.binaryage.com/totalfinder-without-simbl)
 
-## TotalFinder configuration file
-
-In special case you may want to create ini file to override TotalFinder configuration. Currently it is useful in case you install TotalFinder.app elsewhere than into /Applications/TotalFinder.app
-
-config file ~/.totalfinder may look like this:
-
-    location = ~/Applications/TotalFinder.app
-
 ## BATFinit event
 
 Installs TotalFinder.bundle into running Finder.app (/Applications/TotalFinder.app is just a wrapper app for this script)
