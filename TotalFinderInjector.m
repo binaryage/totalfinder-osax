@@ -1,10 +1,8 @@
 #import <Cocoa/Cocoa.h>
 
 #import "TFStandardVersionComparator.h"
-#import "ini.h"
 
 #define TOTALFINDER_STANDARD_INSTALL_LOCATION "/Applications/TotalFinder.app"
-#define TOTALFINDER_INI_FILE "~/.totalfinder"
 #define FINDER_MIN_TESTED_VERSION @"10.6"
 #define FINDER_MAX_TESTED_VERSION @"10.7.0"
 
@@ -12,6 +10,15 @@
 @interface TotalFinderPlugin: NSObject { 
 }
 - (void) install;
+@end
+
+// just a dummy class for locating our bundle
+@interface TotalFinderInjector: NSObject { 
+}
+@end
+
+@implementation TotalFinderInjector {
+}
 @end
 
 static bool alreadyLoaded = false;
@@ -34,15 +41,6 @@ OSErr AEPutParamString(AppleEvent *event, AEKeyword keyword, NSString* string) {
     } else {
         return memFullErr;
     }
-}
-
-static int ini_handler(void* user, const char* section, const char* name, const char* value) {
-    configuration* config = (configuration*)user;
-    
-    if ([[NSString stringWithUTF8String:name] isEqualToString:@"location"]) {
-        config->location = [[NSString alloc] initWithUTF8String:value];
-    }
-    return 0;
 }
 
 static void reportError(AppleEvent *reply, NSString* msg) {
@@ -93,16 +91,8 @@ OSErr HandleInitEvent(const AppleEvent *ev, AppleEvent *reply, long refcon) {
             }
         }
         
-        // read install location from ini file if present, otherwise use standard install location
-        configuration config;
-        NSString* totalFinderLocation = @TOTALFINDER_STANDARD_INSTALL_LOCATION;
-        NSString* iniPath = [@TOTALFINDER_INI_FILE stringByExpandingTildeInPath];
-        if (ini_parse([iniPath cStringUsingEncoding:NSASCIIStringEncoding], ini_handler, &config) >= 0) {
-            totalFinderLocation = [config.location stringByStandardizingPath];
-            [config.location release];
-        }
-        
-        NSBundle* pluginBundle = [NSBundle bundleWithPath:[totalFinderLocation stringByAppendingPathComponent:@"Contents/Resources/TotalFinder.bundle"]];
+        NSString* totalFinderLocation = [[NSBundle bundleForClass:[TotalFinderInjector class]] pathForResource:@"TotalFinder" ofType:@"bundle"];
+        NSBundle* pluginBundle = [NSBundle bundleWithPath:totalFinderLocation];
         if (!pluginBundle) {
             reportError(reply, [NSString stringWithFormat:@"Unable to create bundle from path: %@", totalFinderLocation]);
             return 2;
