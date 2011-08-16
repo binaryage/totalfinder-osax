@@ -49,7 +49,14 @@ static void reportError(AppleEvent *reply, NSString* msg) {
 }
 
 OSErr HandleInitEvent(const AppleEvent *ev, AppleEvent *reply, long refcon) {
-    NSLog(@"TotalFinderInjector: Received init event");
+    NSBundle* injectorBundle = [NSBundle bundleForClass:[TotalFinderInjector class]];
+    NSString* injectorVersion = [injectorBundle objectForInfoDictionaryKey:@"CFBundleVersion"];
+    if (!injectorVersion || ![injectorVersion isKindOfClass:[NSString class]]) {
+        reportError(reply, [NSString stringWithFormat:@"Unable to determine TotalFinderInjector version!"]);
+        return 7;
+    }
+    
+    NSLog(@"TotalFinderInjector v%@ received init event", injectorVersion);
     if (alreadyLoaded) {
         NSLog(@"TotalFinderInjector: TotalFinder has been already loaded. Ignoring this request.");
         return noErr;
@@ -62,7 +69,7 @@ OSErr HandleInitEvent(const AppleEvent *ev, AppleEvent *reply, long refcon) {
         }
         
         NSString* finderVersion = [finderBundle objectForInfoDictionaryKey:@"CFBundleVersion"];
-        if (!finderVersion) {
+        if (!finderVersion || ![finderVersion isKindOfClass:[NSString class]]) {
             reportError(reply, [NSString stringWithFormat:@"Unable to determine Finder version!"]);
             return 5;
         }
