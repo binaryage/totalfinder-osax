@@ -98,10 +98,11 @@ OSErr HandleInitEvent(const AppleEvent *ev, AppleEvent *reply, long refcon) {
             }
         }
         
-        NSString* totalFinderLocation = [[NSBundle bundleForClass:[TotalFinderInjector class]] pathForResource:@"TotalFinder" ofType:@"bundle"];
+        NSBundle* totalFinderInjectorBundle = [NSBundle bundleForClass:[TotalFinderInjector class]];
+        NSString* totalFinderLocation = [totalFinderInjectorBundle pathForResource:@"TotalFinder" ofType:@"bundle"];
         NSBundle* pluginBundle = [NSBundle bundleWithPath:totalFinderLocation];
         if (!pluginBundle) {
-            reportError(reply, [NSString stringWithFormat:@"Unable to create bundle from path: %@", totalFinderLocation]);
+            reportError(reply, [NSString stringWithFormat:@"Unable to create bundle from path: %@ [%@]", totalFinderLocation, totalFinderInjectorBundle]);
             return 2;
         }
         
