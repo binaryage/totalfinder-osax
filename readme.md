@@ -4,7 +4,7 @@ This source code implements scripting additions used by [TotalFinder](http://tot
 
 **TotalFinder** is a plugin for Apples's Finder.app which brings tabs, dual panels and more!
 
-<a href="http://totalfinder.binaryage.com"><img src="http://totalfinder.binaryage.com/base/img/totalfinder-mainshot.png"></a>
+<a href="http://totalfinder.binaryage.com"><img src="http://totalfinder.binaryage.com/images/showcase/showcase-dual-mode.png"></a>
 
 ### Visit [totalfinder.binaryage.com](http://totalfinder.binaryage.com)
 
