@@ -2,6 +2,8 @@
 
 #import "TFStandardVersionComparator.h"
 
+#define EXPORT __attribute__((visibility("default")))
+
 #define TOTALFINDER_STANDARD_INSTALL_LOCATION "/Applications/TotalFinder.app"
 #define FINDER_MIN_TESTED_VERSION @"10.7"
 #define FINDER_MAX_TESTED_VERSION @"10.8.2"
@@ -27,7 +29,7 @@ typedef struct {
     NSString* location;
 } configuration;
 
-OSErr AEPutParamString(AppleEvent *event, AEKeyword keyword, NSString* string) {
+static OSErr AEPutParamString(AppleEvent *event, AEKeyword keyword, NSString* string) {
     UInt8 *textBuf;
     CFIndex length, maxBytes, actualBytes;
     length = CFStringGetLength((CFStringRef)string);
@@ -48,7 +50,7 @@ static void reportError(AppleEvent *reply, NSString* msg) {
     AEPutParamString(reply, keyErrorString, msg);
 }
 
-OSErr HandleInitEvent(const AppleEvent *ev, AppleEvent *reply, long refcon) {
+EXPORT OSErr HandleInitEvent(const AppleEvent *ev, AppleEvent *reply, long refcon) {
     NSBundle* injectorBundle = [NSBundle bundleForClass:[TotalFinderInjector class]];
     NSString* injectorVersion = [injectorBundle objectForInfoDictionaryKey:@"CFBundleVersion"];
     if (!injectorVersion || ![injectorVersion isKindOfClass:[NSString class]]) {
@@ -129,7 +131,7 @@ OSErr HandleInitEvent(const AppleEvent *ev, AppleEvent *reply, long refcon) {
     return 1;
 }
 
-OSErr HandleCheckEvent(const AppleEvent *ev, AppleEvent *reply, long refcon) {
+EXPORT OSErr HandleCheckEvent(const AppleEvent *ev, AppleEvent *reply, long refcon) {
     if (alreadyLoaded) {
         return noErr;
     }
