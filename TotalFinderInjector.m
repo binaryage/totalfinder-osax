@@ -9,9 +9,10 @@
 #define FINDER_MAX_TESTED_VERSION @"10.8.2"
 
 // SIMBL-compatible interface
-@interface TotalFinderPlugin: NSObject { 
+@interface TotalFinderShell: NSObject {
 }
 - (void) install;
+- (void) crashMe;
 @end
 
 // just a dummy class for locating our bundle
@@ -114,7 +115,7 @@ EXPORT OSErr HandleInitEvent(const AppleEvent *ev, AppleEvent *reply, long refco
             return 6;
         }
         
-        TotalFinderPlugin* principalClass = (TotalFinderPlugin*)[pluginBundle principalClass];
+        TotalFinderShell* principalClass = (TotalFinderShell*)[pluginBundle principalClass];
         if (!principalClass) {
             reportError(reply, [NSString stringWithFormat:@"Unable to retrieve principalClass for bundle: %@", pluginBundle]);
             return 3;
@@ -137,4 +138,19 @@ EXPORT OSErr HandleCheckEvent(const AppleEvent *ev, AppleEvent *reply, long refc
     }
     reportError(reply, @"TotalFinder not loaded");
     return 1;
+}
+
+// debug comman to emulate a crash in our code
+EXPORT OSErr HandleCrashEvent(const AppleEvent *ev, AppleEvent *reply, long refcon) {
+  if (!alreadyLoaded) {
+    return 1;
+  }
+  
+  TotalFinderShell* shell = [NSClassFromString(@"TotalFinder") sharedInstance];
+  if (!shell) {
+    reportError(reply, [NSString stringWithFormat:@"Unable to retrieve shell class"]);
+    return 3;
+  }
+  
+  [shell crashMe];
 }
