@@ -8,6 +8,9 @@
 #define FINDER_MIN_TESTED_VERSION @"10.7"
 #define FINDER_MAX_TESTED_VERSION @"10.8.2"
 
+#define DOCK_MIN_TESTED_VERSION @"0"
+#define DOCK_MAX_TESTED_VERSION @"1168.6" // 10.8 Mountain Lion Preview 4
+
 // SIMBL-compatible interface
 @interface TotalFinderShell : NSObject { }
 -(void) install;
@@ -22,6 +25,7 @@
 @end
 
 static bool alreadyLoaded = false;
+static bool dockAlreadyLoaded = false;
 
 typedef struct {
   NSString* location;
@@ -49,43 +53,72 @@ static void reportError(AppleEvent* reply, NSString* msg) {
   AEPutParamString(reply, keyErrorString, msg);
 }
 
-EXPORT OSErr HandleInitEvent(const AppleEvent* ev, AppleEvent* reply, long refcon) {
-  NSBundle* injectorBundle = [NSBundle bundleForClass:[TotalFinderInjector class]];
-  NSString* injectorVersion = [injectorBundle objectForInfoDictionaryKey:@"CFBundleVersion"];
+typedef enum {
+  InvalidBundleType,
+  TotalFinderBundleType,
+  DockHelperBundleType
+} TFBundleType;
 
-  if (!injectorVersion || ![injectorVersion isKindOfClass:[NSString class]]) {
-    reportError(reply, [NSString stringWithFormat:@"Unable to determine TotalFinderInjector version!"]);
-    return 7;
+static OSErr loadBundle(TFBundleType type, AppleEvent* reply, long refcon) {
+  bool isLoaded = false;
+  NSString* bundleName = nil;
+  NSString* targetAppName = nil;
+  NSString* supressKey = nil;
+  NSString* maxVersion = nil;
+  NSString* minVersion = nil;
+
+  switch (type) {
+    case TotalFinderBundleType:
+      isLoaded = alreadyLoaded;
+      bundleName = @"TotalFinder";
+      targetAppName = @"Finder";
+      supressKey = @"TotalFinderSuppressFinderVersionCheck";
+      maxVersion = FINDER_MAX_TESTED_VERSION;
+      minVersion = FINDER_MIN_TESTED_VERSION;
+      break;
+    case DockHelperBundleType:
+      isLoaded = dockAlreadyLoaded;
+      bundleName = @"DockHelper";
+      targetAppName = @"Dock";
+      supressKey = @"TotalFinderSuppressDockVersionCheck";
+      maxVersion = DOCK_MAX_TESTED_VERSION;
+      minVersion = DOCK_MIN_TESTED_VERSION;
+      break;
+    default:
+      NSLog(@"Failed to load bundle for type %d", type);
+      return 8;
+
+      break;
   }
 
-  NSLog(@"TotalFinderInjector v%@ received init event", injectorVersion);
-  if (alreadyLoaded) {
-    NSLog(@"TotalFinderInjector: TotalFinder has been already loaded. Ignoring this request.");
+  if (isLoaded) {
+    NSLog(@"TotalFinderInjector: %@ has been already loaded. Ignoring this request.", bundleName);
     return noErr;
   }
+
   @try {
-    NSBundle* finderBundle = [NSBundle mainBundle];
-    if (!finderBundle) {
-      reportError(reply, [NSString stringWithFormat:@"Unable to locate main Finder bundle!"]);
+    NSBundle* mainBundle = [NSBundle mainBundle];
+    if (!mainBundle) {
+      reportError(reply, [NSString stringWithFormat:@"Unable to locate main %@ bundle!", targetAppName]);
       return 4;
     }
 
-    NSString* finderVersion = [finderBundle objectForInfoDictionaryKey:@"CFBundleVersion"];
-    if (!finderVersion || ![finderVersion isKindOfClass:[NSString class]]) {
-      reportError(reply, [NSString stringWithFormat:@"Unable to determine Finder version!"]);
+    NSString* mainVersion = [mainBundle objectForInfoDictionaryKey:@"CFBundleVersion"];
+    if (!mainVersion || ![mainVersion isKindOfClass:[NSString class]]) {
+      reportError(reply, [NSString stringWithFormat:@"Unable to determine %@ version!", targetAppName]);
       return 5;
     }
 
     // future compatibility check
-    NSString* supressKey = @"TotalFinderSuppressFinderVersionCheck";
     NSUserDefaults* defaults = [NSUserDefaults standardUserDefaults];
     if (![defaults boolForKey:supressKey]) {
       TFStandardVersionComparator* comparator = [TFStandardVersionComparator defaultComparator];
-      if (([comparator compareVersion:finderVersion toVersion:FINDER_MAX_TESTED_VERSION] == NSOrderedDescending) ||
-          ([comparator compareVersion:finderVersion toVersion:FINDER_MIN_TESTED_VERSION] == NSOrderedAscending)) {
+      if (([comparator compareVersion:mainVersion toVersion:maxVersion] == NSOrderedDescending) ||
+          ([comparator compareVersion:mainVersion toVersion:minVersion] == NSOrderedAscending)) {
         NSAlert* alert = [NSAlert new];
-        [alert setMessageText:[NSString stringWithFormat:@"You have Finder version %@", finderVersion]];
-        [alert setInformativeText:[NSString stringWithFormat:@"But TotalFinder was properly tested only with Finder versions in range %@ - %@\n\nYou have probably updated your system and Finder version got bumped by Apple developers.\n\nYou may expect a new TotalFinder release soon.", FINDER_MIN_TESTED_VERSION, FINDER_MAX_TESTED_VERSION]];
+        [alert setMessageText:[NSString stringWithFormat:@"You have %@ version %@", targetAppName, mainVersion]];
+        [alert setInformativeText:[NSString stringWithFormat:@"But %@ was properly tested only with %@ versions in range %@ - %@\n\nYou have probably updated your system and %@ version got bumped by Apple developers.\n\nYou may expect a new TotalFinder release soon.", bundleName, targetAppName, targetAppName, FINDER_MIN_TESTED_VERSION,
+                                   FINDER_MAX_TESTED_VERSION]];
         [alert setShowsSuppressionButton:YES];
         [alert addButtonWithTitle:@"Launch TotalFinder anyway"];
         [alert addButtonWithTitle:@"Cancel"];
@@ -101,7 +134,7 @@ EXPORT OSErr HandleInitEvent(const AppleEvent* ev, AppleEvent* reply, long refco
     }
 
     NSBundle* totalFinderInjectorBundle = [NSBundle bundleForClass:[TotalFinderInjector class]];
-    NSString* totalFinderLocation = [totalFinderInjectorBundle pathForResource:@"TotalFinder" ofType:@"bundle"];
+    NSString* totalFinderLocation = [totalFinderInjectorBundle pathForResource:bundleName ofType:@"bundle"];
     NSBundle* pluginBundle = [NSBundle bundleWithPath:totalFinderLocation];
     if (!pluginBundle) {
       reportError(reply, [NSString stringWithFormat:@"Unable to create bundle from path: %@ [%@]", totalFinderLocation, totalFinderInjectorBundle]);
@@ -113,18 +146,59 @@ EXPORT OSErr HandleInitEvent(const AppleEvent* ev, AppleEvent* reply, long refco
       reportError(reply, [NSString stringWithFormat:@"Unable to load bundle from path: %@ error: %@", totalFinderLocation, [error localizedDescription]]);
       return 6;
     }
-
-    TotalFinderShell* principalClass = (TotalFinderShell*)[pluginBundle principalClass];
+    Class principalClass = [pluginBundle principalClass];
     if (!principalClass) {
       reportError(reply, [NSString stringWithFormat:@"Unable to retrieve principalClass for bundle: %@", pluginBundle]);
       return 3;
     }
-    if ([principalClass respondsToSelector:@selector(install)]) {
-      NSLog(@"TotalFinderInjector: Installing TotalFinder ...");
-      [principalClass install];
+    id principalClassObject = NSClassFromString(NSStringFromClass(principalClass));
+    if ([principalClassObject respondsToSelector:@selector(install)]) {
+      NSLog(@"TotalFinderInjector: Installing %@ ...", bundleName);
+      [principalClassObject install];
     }
-    alreadyLoaded = true;
+
+    if (type == TotalFinderBundleType) {
+      alreadyLoaded = true;
+      [NSTask launchedTaskWithLaunchPath:@"/usr/bin/osascript" arguments:@[@"-e", @"tell application \"Dock\" to «event BATFinit»"]];
+    } else if (type == DockHelperBundleType) {
+      dockAlreadyLoaded = true;
+    }
+
     return noErr;
+  } @catch (NSException* exception) {
+    reportError(reply, [NSString stringWithFormat:@"Failed to load %@ with exception: %@", bundleName, exception]);
+  }
+
+  return 1;
+}
+
+EXPORT OSErr HandleInitEvent(const AppleEvent* ev, AppleEvent* reply, long refcon) {
+  NSBundle* injectorBundle = [NSBundle bundleForClass:[TotalFinderInjector class]];
+  NSString* injectorVersion = [injectorBundle objectForInfoDictionaryKey:@"CFBundleVersion"];
+
+  if (!injectorVersion || ![injectorVersion isKindOfClass:[NSString class]]) {
+    reportError(reply, [NSString stringWithFormat:@"Unable to determine TotalFinderInjector version!"]);
+    return 7;
+  }
+
+  NSLog(@"TotalFinderInjector v%@ received init event", injectorVersion);
+
+  @try {
+    NSBundle* mainBundle = [NSBundle mainBundle];
+    if (!mainBundle) {
+      reportError(reply, [NSString stringWithFormat:@"Unable to locate main bundle!"]);
+      return 4;
+    }
+
+    NSString* bundleID = [mainBundle objectForInfoDictionaryKey:@"CFBundleIdentifier"];
+    TFBundleType type = InvalidBundleType;
+    if ([bundleID isEqualToString:@"com.apple.finder"]) {
+      type = TotalFinderBundleType;
+    } else if ([bundleID isEqualToString:@"com.apple.dock"]) {
+      type = DockHelperBundleType;
+    }
+
+    return loadBundle(type, reply, refcon);
   } @catch (NSException* exception) {
     reportError(reply, [NSString stringWithFormat:@"Failed to load TotalFinder with exception: %@", exception]);
   }
