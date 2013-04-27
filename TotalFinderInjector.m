@@ -173,24 +173,23 @@ static OSErr loadBundle(TFBundleType type, AppleEvent* reply, long refcon) {
 }
 
 static TFBundleType mainBundleType(AppleEvent* reply) {
-	@try {
-		NSBundle* mainBundle = [NSBundle mainBundle];
-		if (!mainBundle) {
-			reportError(reply, [NSString stringWithFormat:@"Unable to locate main bundle!"]);
-			return InvalidBundleType;
-		}
+  @try {
+    NSBundle* mainBundle = [NSBundle mainBundle];
+    if (!mainBundle) {
+      reportError(reply, [NSString stringWithFormat:@"Unable to locate main bundle!"]);
+      return InvalidBundleType;
+    }
 
-		if ([[mainBundle bundleIdentifier] isEqualToString:@"com.apple.finder"]) {
-			return TotalFinderBundleType;
-		} else if ([[mainBundle bundleIdentifier] isEqualToString:@"com.apple.dock"]) {
-			return DockHelperBundleType;
-		}
-	}
-	@catch (NSException *exception) {
-		reportError(reply, [NSString stringWithFormat:@"Failed to load main bundle with exception: %@", exception]);
-	}
+    if ([[mainBundle bundleIdentifier] isEqualToString:@"com.apple.finder"]) {
+      return TotalFinderBundleType;
+    } else if ([[mainBundle bundleIdentifier] isEqualToString:@"com.apple.dock"]) {
+      return DockHelperBundleType;
+    }
+  } @catch (NSException* exception) {
+    reportError(reply, [NSString stringWithFormat:@"Failed to load main bundle with exception: %@", exception]);
+  }
 
-	return InvalidBundleType;
+  return InvalidBundleType;
 }
 
 EXPORT OSErr HandleInitEvent(const AppleEvent* ev, AppleEvent* reply, long refcon) {
@@ -215,7 +214,8 @@ EXPORT OSErr HandleInitEvent(const AppleEvent* ev, AppleEvent* reply, long refco
 
 EXPORT OSErr HandleCheckEvent(const AppleEvent* ev, AppleEvent* reply, long refcon) {
   TFBundleType type = mainBundleType(reply);
-  if ((type == TotalFinderBundleType && alreadyLoaded) || (type == DockHelperBundleType && dockAlreadyLoaded)) {
+
+  if (((type == TotalFinderBundleType) && alreadyLoaded) || ((type == DockHelperBundleType) && dockAlreadyLoaded)) {
     return noErr;
   }
 
@@ -227,7 +227,7 @@ EXPORT OSErr HandleCheckEvent(const AppleEvent* ev, AppleEvent* reply, long refc
 EXPORT OSErr HandleCrashEvent(const AppleEvent* ev, AppleEvent* reply, long refcon) {
   TFBundleType type = mainBundleType(reply);
 
-  if ((type == TotalFinderBundleType && !alreadyLoaded) || (type == DockHelperBundleType && !dockAlreadyLoaded)) {
+  if (((type == TotalFinderBundleType) && !alreadyLoaded) || ((type == DockHelperBundleType) && !dockAlreadyLoaded)) {
     return 1;
   }
 
