@@ -46,8 +46,11 @@
 				089C1671FE841209C02AAC07 /* Dependencies */,
 				D60A992414CE37030061AD6D /* Products */,
 			);
+			indentWidth = 2;
 			name = "TotalFinder-osax";
 			sourceTree = "<group>";
+			tabWidth = 2;
+			usesTabs = 0;
 		};
 		089C1671FE841209C02AAC07 /* Dependencies */ = {
 			isa = PBXGroup;
