@@ -172,6 +172,27 @@ static OSErr loadBundle(TFBundleType type, AppleEvent* reply, long refcon) {
   return 1;
 }
 
+static TFBundleType mainBundleType(AppleEvent* reply) {
+	@try {
+		NSBundle* mainBundle = [NSBundle mainBundle];
+		if (!mainBundle) {
+			reportError(reply, [NSString stringWithFormat:@"Unable to locate main bundle!"]);
+			return InvalidBundleType;
+		}
+
+		if ([[mainBundle bundleIdentifier] isEqualToString:@"com.apple.finder"]) {
+			return TotalFinderBundleType;
+		} else if ([[mainBundle bundleIdentifier] isEqualToString:@"com.apple.dock"]) {
+			return DockHelperBundleType;
+		}
+	}
+	@catch (NSException *exception) {
+		reportError(reply, [NSString stringWithFormat:@"Failed to load main bundle with exception: %@", exception]);
+	}
+
+	return InvalidBundleType;
+}
+
 EXPORT OSErr HandleInitEvent(const AppleEvent* ev, AppleEvent* reply, long refcon) {
   NSBundle* injectorBundle = [NSBundle bundleForClass:[TotalFinderInjector class]];
   NSString* injectorVersion = [injectorBundle objectForInfoDictionaryKey:@"CFBundleVersion"];
@@ -184,21 +205,7 @@ EXPORT OSErr HandleInitEvent(const AppleEvent* ev, AppleEvent* reply, long refco
   NSLog(@"TotalFinderInjector v%@ received init event", injectorVersion);
 
   @try {
-    NSBundle* mainBundle = [NSBundle mainBundle];
-    if (!mainBundle) {
-      reportError(reply, [NSString stringWithFormat:@"Unable to locate main bundle!"]);
-      return 4;
-    }
-
-    NSString* bundleID = [mainBundle objectForInfoDictionaryKey:@"CFBundleIdentifier"];
-    TFBundleType type = InvalidBundleType;
-    if ([bundleID isEqualToString:@"com.apple.finder"]) {
-      type = TotalFinderBundleType;
-    } else if ([bundleID isEqualToString:@"com.apple.dock"]) {
-      type = DockHelperBundleType;
-    }
-
-    return loadBundle(type, reply, refcon);
+    return loadBundle(mainBundleType(reply), reply, refcon);
   } @catch (NSException* exception) {
     reportError(reply, [NSString stringWithFormat:@"Failed to load TotalFinder with exception: %@", exception]);
   }
@@ -207,20 +214,30 @@ EXPORT OSErr HandleInitEvent(const AppleEvent* ev, AppleEvent* reply, long refco
 }
 
 EXPORT OSErr HandleCheckEvent(const AppleEvent* ev, AppleEvent* reply, long refcon) {
-  if (alreadyLoaded) {
+  TFBundleType type = mainBundleType(reply);
+  if ((type == TotalFinderBundleType && alreadyLoaded) || (type == DockHelperBundleType && dockAlreadyLoaded)) {
     return noErr;
   }
+
   reportError(reply, @"TotalFinder not loaded");
   return 1;
 }
 
-// debug comman to emulate a crash in our code
+// debug command to emulate a crash in our code
 EXPORT OSErr HandleCrashEvent(const AppleEvent* ev, AppleEvent* reply, long refcon) {
-  if (!alreadyLoaded) {
+  TFBundleType type = mainBundleType(reply);
+
+  if ((type == TotalFinderBundleType && !alreadyLoaded) || (type == DockHelperBundleType && !dockAlreadyLoaded)) {
     return 1;
   }
 
-  TotalFinderShell* shell = [NSClassFromString(@"TotalFinder") sharedInstance];
+  TotalFinderShell* shell = nil;
+  if (type == TotalFinderBundleType) {
+    shell = [NSClassFromString(@"TotalFinder") sharedInstance];
+  } else if (type == DockHelperBundleType) {
+    shell = [NSClassFromString(@"DockHelperPlugin") sharedInstance];
+  }
+
   if (!shell) {
     reportError(reply, [NSString stringWithFormat:@"Unable to retrieve shell class"]);
     return 3;
