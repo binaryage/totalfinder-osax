@@ -8,9 +8,6 @@
 #define FINDER_MIN_TESTED_VERSION @"10.7"
 #define FINDER_MAX_TESTED_VERSION @"10.8.3"
 
-#define DOCK_MIN_TESTED_VERSION @"0"
-#define DOCK_MAX_TESTED_VERSION @"1168.6" // 10.8 Mountain Lion Preview 4
-
 // SIMBL-compatible interface
 @interface TotalFinderShell : NSObject { }
 -(void) install;
@@ -25,7 +22,6 @@
 @end
 
 static bool finderAlreadyLoaded = false;
-static bool dockAlreadyLoaded = false;
 
 typedef struct {
   NSString* location;
@@ -53,45 +49,24 @@ static void reportError(AppleEvent* reply, NSString* msg) {
   AEPutParamString(reply, keyErrorString, msg);
 }
 
-typedef enum {
-  InvalidBundleType,
-  TotalFinderBundleType,
-  DockHelperBundleType
-} TFBundleType;
+EXPORT OSErr HandleInitEvent(const AppleEvent* ev, AppleEvent* reply, long refcon) {
+  NSBundle* injectorBundle = [NSBundle bundleForClass:[TotalFinderInjector class]];
+  NSString* injectorVersion = [injectorBundle objectForInfoDictionaryKey:@"CFBundleVersion"];
 
-static OSErr loadBundle(TFBundleType type, AppleEvent* reply, long refcon) {
-  bool isLoaded = false;
-  NSString* bundleName = nil;
-  NSString* targetAppName = nil;
-  NSString* supressKey = nil;
-  NSString* maxVersion = nil;
-  NSString* minVersion = nil;
-
-  switch (type) {
-    case TotalFinderBundleType:
-      isLoaded = finderAlreadyLoaded;
-      bundleName = @"TotalFinder";
-      targetAppName = @"Finder";
-      supressKey = @"TotalFinderSuppressFinderVersionCheck";
-      maxVersion = FINDER_MAX_TESTED_VERSION;
-      minVersion = FINDER_MIN_TESTED_VERSION;
-      break;
-    case DockHelperBundleType:
-      isLoaded = dockAlreadyLoaded;
-      bundleName = @"DockHelper";
-      targetAppName = @"Dock";
-      supressKey = @"TotalFinderSuppressDockVersionCheck";
-      maxVersion = DOCK_MAX_TESTED_VERSION;
-      minVersion = DOCK_MIN_TESTED_VERSION;
-      break;
-    default:
-      NSLog(@"Failed to load bundle for type %d", type);
-      return 8;
-
-      break;
+  if (!injectorVersion || ![injectorVersion isKindOfClass:[NSString class]]) {
+    reportError(reply, [NSString stringWithFormat:@"Unable to determine TotalFinderInjector version!"]);
+    return 7;
   }
 
-  if (isLoaded) {
+  NSLog(@"TotalFinderInjector v%@ received init event", injectorVersion);
+
+  NSString* bundleName = @"TotalFinder";
+  NSString* targetAppName = @"Finder";
+  NSString* supressKey = @"TotalFinderSuppressFinderVersionCheck";
+  NSString* maxVersion = FINDER_MAX_TESTED_VERSION;
+  NSString* minVersion = FINDER_MIN_TESTED_VERSION;
+
+  if (finderAlreadyLoaded) {
     NSLog(@"TotalFinderInjector: %@ has been already loaded. Ignoring this request.", bundleName);
     return noErr;
   }
@@ -110,27 +85,24 @@ static OSErr loadBundle(TFBundleType type, AppleEvent* reply, long refcon) {
     }
 
     // future compatibility check
-    if (type == TotalFinderBundleType) {
-      // in Dock we cannot use NSAlert and similar UI stuff - this would hang the Dock process and cause 100% CPU load
-      NSUserDefaults* defaults = [NSUserDefaults standardUserDefaults];
-      if (![defaults boolForKey:supressKey]) {
-        TFStandardVersionComparator* comparator = [TFStandardVersionComparator defaultComparator];
-        if (([comparator compareVersion:mainVersion toVersion:maxVersion] == NSOrderedDescending) ||
-            ([comparator compareVersion:mainVersion toVersion:minVersion] == NSOrderedAscending)) {
-          NSAlert* alert = [NSAlert new];
-          [alert setMessageText:[NSString stringWithFormat:@"You have %@ version %@", targetAppName, mainVersion]];
-          [alert setInformativeText:[NSString stringWithFormat:@"But %@ was properly tested only with %@ versions in range %@ - %@\n\nYou have probably updated your system and %@ version got bumped by Apple developers.\n\nYou may expect a new TotalFinder release soon.", bundleName, targetAppName, targetAppName, minVersion, maxVersion]];
-          [alert setShowsSuppressionButton:YES];
-          [alert addButtonWithTitle:@"Launch TotalFinder anyway"];
-          [alert addButtonWithTitle:@"Cancel"];
-          NSInteger res = [alert runModal];
-          if ([[alert suppressionButton] state] == NSOnState) {
-            [defaults setBool:YES forKey:supressKey];
-          }
-          if (res != NSAlertFirstButtonReturn) {
-            // cancel
-            return noErr;
-          }
+    NSUserDefaults* defaults = [NSUserDefaults standardUserDefaults];
+    if (![defaults boolForKey:supressKey]) {
+      TFStandardVersionComparator* comparator = [TFStandardVersionComparator defaultComparator];
+      if (([comparator compareVersion:mainVersion toVersion:maxVersion] == NSOrderedDescending) ||
+          ([comparator compareVersion:mainVersion toVersion:minVersion] == NSOrderedAscending)) {
+        NSAlert* alert = [NSAlert new];
+        [alert setMessageText:[NSString stringWithFormat:@"You have %@ version %@", targetAppName, mainVersion]];
+        [alert setInformativeText:[NSString stringWithFormat:@"But %@ was properly tested only with %@ versions in range %@ - %@\n\nYou have probably updated your system and %@ version got bumped by Apple developers.\n\nYou may expect a new TotalFinder release soon.", bundleName, targetAppName, targetAppName, minVersion, maxVersion]];
+        [alert setShowsSuppressionButton:YES];
+        [alert addButtonWithTitle:@"Launch TotalFinder anyway"];
+        [alert addButtonWithTitle:@"Cancel"];
+        NSInteger res = [alert runModal];
+        if ([[alert suppressionButton] state] == NSOnState) {
+          [defaults setBool:YES forKey:supressKey];
+        }
+        if (res != NSAlertFirstButtonReturn) {
+          // cancel
+          return noErr;
         }
       }
     }
@@ -159,12 +131,7 @@ static OSErr loadBundle(TFBundleType type, AppleEvent* reply, long refcon) {
       [principalClassObject install];
     }
 
-    if (type == TotalFinderBundleType) {
-      finderAlreadyLoaded = true;
-      [NSTask launchedTaskWithLaunchPath:@"/usr/bin/osascript" arguments:@[@"-e", @"tell application \"Dock\" to «event BATFinit»"]];
-    } else if (type == DockHelperBundleType) {
-      dockAlreadyLoaded = true;
-    }
+    finderAlreadyLoaded = true;
 
     return noErr;
   } @catch (NSException* exception) {
@@ -174,50 +141,8 @@ static OSErr loadBundle(TFBundleType type, AppleEvent* reply, long refcon) {
   return 1;
 }
 
-static TFBundleType mainBundleType(AppleEvent* reply) {
-  @try {
-    NSBundle* mainBundle = [NSBundle mainBundle];
-    if (!mainBundle) {
-      reportError(reply, [NSString stringWithFormat:@"Unable to locate main bundle!"]);
-      return InvalidBundleType;
-    }
-
-    if ([[mainBundle bundleIdentifier] isEqualToString:@"com.apple.finder"]) {
-      return TotalFinderBundleType;
-    } else if ([[mainBundle bundleIdentifier] isEqualToString:@"com.apple.dock"]) {
-      return DockHelperBundleType;
-    }
-  } @catch (NSException* exception) {
-    reportError(reply, [NSString stringWithFormat:@"Failed to load main bundle with exception: %@", exception]);
-  }
-
-  return InvalidBundleType;
-}
-
-EXPORT OSErr HandleInitEvent(const AppleEvent* ev, AppleEvent* reply, long refcon) {
-  NSBundle* injectorBundle = [NSBundle bundleForClass:[TotalFinderInjector class]];
-  NSString* injectorVersion = [injectorBundle objectForInfoDictionaryKey:@"CFBundleVersion"];
-
-  if (!injectorVersion || ![injectorVersion isKindOfClass:[NSString class]]) {
-    reportError(reply, [NSString stringWithFormat:@"Unable to determine TotalFinderInjector version!"]);
-    return 7;
-  }
-
-  NSLog(@"TotalFinderInjector v%@ received init event", injectorVersion);
-
-  @try {
-    return loadBundle(mainBundleType(reply), reply, refcon);
-  } @catch (NSException* exception) {
-    reportError(reply, [NSString stringWithFormat:@"Failed to load TotalFinder with exception: %@", exception]);
-  }
-
-  return 1;
-}
-
 EXPORT OSErr HandleCheckEvent(const AppleEvent* ev, AppleEvent* reply, long refcon) {
-  TFBundleType type = mainBundleType(reply);
-
-  if (((type == TotalFinderBundleType) && finderAlreadyLoaded) || ((type == DockHelperBundleType) && dockAlreadyLoaded)) {
+  if (finderAlreadyLoaded) {
     return noErr;
   }
 
@@ -227,19 +152,11 @@ EXPORT OSErr HandleCheckEvent(const AppleEvent* ev, AppleEvent* reply, long refc
 
 // debug command to emulate a crash in our code
 EXPORT OSErr HandleCrashEvent(const AppleEvent* ev, AppleEvent* reply, long refcon) {
-  TFBundleType type = mainBundleType(reply);
-
-  if (((type == TotalFinderBundleType) && !finderAlreadyLoaded) || ((type == DockHelperBundleType) && !dockAlreadyLoaded)) {
+  if (!finderAlreadyLoaded) {
     return 1;
   }
 
-  TotalFinderShell* shell = nil;
-  if (type == TotalFinderBundleType) {
-    shell = [NSClassFromString(@"TotalFinder") sharedInstance];
-  } else if (type == DockHelperBundleType) {
-    shell = [NSClassFromString(@"DockHelperPlugin") sharedInstance];
-  }
-
+  TotalFinderShell* shell = [NSClassFromString(@"TotalFinder") sharedInstance];
   if (!shell) {
     reportError(reply, [NSString stringWithFormat:@"Unable to retrieve shell class"]);
     return 3;
