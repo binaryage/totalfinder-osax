@@ -6,7 +6,8 @@
 
 #define TOTALFINDER_STANDARD_INSTALL_LOCATION "/Applications/TotalFinder.app"
 #define FINDER_MIN_TESTED_VERSION @"10.7"
-#define FINDER_MAX_TESTED_VERSION @"10.8.3"
+#define FINDER_MAX_TESTED_VERSION @"10.8"
+#define FINDER_UNSUPPORTED_VERSION @"10.9"
 
 // SIMBL-compatible interface
 @interface TotalFinderShell : NSObject { }
@@ -87,9 +88,7 @@ EXPORT OSErr HandleInitEvent(const AppleEvent* ev, AppleEvent* reply, long refco
     // future compatibility check
     NSUserDefaults* defaults = [NSUserDefaults standardUserDefaults];
     if (![defaults boolForKey:supressKey]) {
-      TFStandardVersionComparator* comparator = [TFStandardVersionComparator defaultComparator];
-      if (([comparator compareVersion:mainVersion toVersion:maxVersion] == NSOrderedDescending) ||
-          ([comparator compareVersion:mainVersion toVersion:minVersion] == NSOrderedAscending)) {
+      if ([mainVersion rangeOfString:FINDER_UNSUPPORTED_VERSION].length > 0) {
         NSAlert* alert = [NSAlert new];
         [alert setMessageText:[NSString stringWithFormat:@"You have %@ version %@", targetAppName, mainVersion]];
         [alert setInformativeText:[NSString stringWithFormat:@"But %@ was properly tested only with %@ versions in range %@ - %@\n\nYou have probably updated your system and %@ version got bumped by Apple developers.\n\nYou may expect a new TotalFinder release soon.", bundleName, targetAppName, targetAppName, minVersion, maxVersion]];
