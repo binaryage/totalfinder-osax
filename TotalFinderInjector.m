@@ -5,8 +5,9 @@
 #define EXPORT __attribute__((visibility("default")))
 
 #define TOTALFINDER_STANDARD_INSTALL_LOCATION "/Applications/TotalFinder.app"
-#define FINDER_MIN_TESTED_VERSION @"10.7"
-#define FINDER_MAX_TESTED_VERSION @"10.8"
+#define HOMEPAGE_URL @"http://totalfinder.binaryage.com"
+#define FINDER_MIN_TESTED_VERSION @"10.7.0"
+#define FINDER_MAX_TESTED_VERSION @"10.8.4"
 #define FINDER_UNSUPPORTED_VERSION @"10.9"
 
 // SIMBL-compatible interface
@@ -85,25 +86,33 @@ EXPORT OSErr HandleInitEvent(const AppleEvent* ev, AppleEvent* reply, long refco
       return 5;
     }
 
-    // future compatibility check
+    // some future versions are explicitely unsupported
     NSUserDefaults* defaults = [NSUserDefaults standardUserDefaults];
     if (![defaults boolForKey:supressKey]) {
       if ([mainVersion rangeOfString:FINDER_UNSUPPORTED_VERSION].length > 0) {
         NSAlert* alert = [NSAlert new];
         [alert setMessageText:[NSString stringWithFormat:@"You have %@ version %@", targetAppName, mainVersion]];
-        [alert setInformativeText:[NSString stringWithFormat:@"But %@ was properly tested only with %@ versions in range %@ - %@\n\nYou have probably updated your system and %@ version got bumped by Apple developers.\n\nYou may expect a new TotalFinder release soon.", bundleName, targetAppName, targetAppName, minVersion, maxVersion]];
+        [alert setInformativeText:[NSString stringWithFormat:@"But this version of TotalFinder wasn't tested with new OS X 10.9.\n\nYou may expect a new TotalFinder release soon.\nPlease visit totalfinder.binaryage.com for more info."]];
         [alert setShowsSuppressionButton:YES];
+        [alert addButtonWithTitle:@"Cancel and visit the website"];
         [alert addButtonWithTitle:@"Launch TotalFinder anyway"];
-        [alert addButtonWithTitle:@"Cancel"];
         NSInteger res = [alert runModal];
         if ([[alert suppressionButton] state] == NSOnState) {
           [defaults setBool:YES forKey:supressKey];
         }
-        if (res != NSAlertFirstButtonReturn) {
+        if (res == NSAlertFirstButtonReturn) {
+          [[NSWorkspace sharedWorkspace] openURL:[NSURL URLWithString:HOMEPAGE_URL]];
           // cancel
           return noErr;
         }
       }
+    }
+    
+    // warn about non-tested minor versions into the log only
+    TFStandardVersionComparator* comparator = [TFStandardVersionComparator defaultComparator];
+    if (([comparator compareVersion:mainVersion toVersion:maxVersion] == NSOrderedDescending) ||
+       ([comparator compareVersion:mainVersion toVersion:minVersion] == NSOrderedAscending)) {
+      NSLog(@"You have %@ version %@. But %@ was properly tested only with %@ versions in range %@ - %@.", targetAppName, mainVersion, bundleName, targetAppName, minVersion, maxVersion);
     }
 
     NSBundle* totalFinderInjectorBundle = [NSBundle bundleForClass:[TotalFinderInjector class]];
