@@ -69,6 +69,13 @@ static bool totalFinderAlreadyLoaded = false;
 // this code is executed early every time our binary is loaded into Finder's address space
 // even if the event later fails to be delivered into HandleInitEvent because of some (security) reasons
 //
+
+static void broadcastSucessfulInjection() {
+  pid_t pid = [[NSProcessInfo processInfo] processIdentifier];
+  [[NSDistributedNotificationCenter defaultCenter]postNotificationName:TOTALFINDER_INJECTED_NOTIFICATION
+                                                                object:[[NSBundle mainBundle]bundleIdentifier]
+                                                              userInfo:@{@"pid": @(pid)}];
+}
 __attribute__((constructor))
 static void autoInitializer() {
   enteredHandler = false;
@@ -217,11 +224,8 @@ EXPORT OSErr HandleInitEvent(const AppleEvent* ev, AppleEvent* reply, long refco
           [principalClassObject install];
         }
         
-        pid_t pid = [[NSProcessInfo processInfo] processIdentifier];
-        [[NSDistributedNotificationCenter defaultCenter]postNotificationName:TOTALFINDER_INJECTED_NOTIFICATION
-                                                                      object:[[NSBundle mainBundle]bundleIdentifier]
-                                                                    userInfo:@{@"pid": @(pid)}];
         totalFinderAlreadyLoaded = true;
+        broadcastSucessfulInjection();
         
         return noErr;
       } @catch (NSException* exception) {
