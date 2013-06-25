@@ -172,25 +172,11 @@ EXPORT OSErr HandleInitEvent(const AppleEvent* ev, AppleEvent* reply, long refco
         }
         
         // some future versions are explicitely unsupported
-        NSUserDefaults* defaults = [NSUserDefaults standardUserDefaults];
-        if (![defaults boolForKey:supressKey]) {
-          if ([mainVersion rangeOfString:FINDER_UNSUPPORTED_VERSION].length > 0) {
-            NSAlert* alert = [NSAlert new];
-            [alert setMessageText:[NSString stringWithFormat:@"You have %@ version %@", targetAppName, mainVersion]];
-            [alert setInformativeText:[NSString stringWithFormat:@"But this version of TotalFinder wasn't tested with new OS X 10.9.\n\nYou may expect a new TotalFinder release soon.\nPlease visit totalfinder.binaryage.com for more info."]];
-            [alert setShowsSuppressionButton:YES];
-            [alert addButtonWithTitle:@"Cancel and visit the website"];
-            [alert addButtonWithTitle:@"Launch TotalFinder anyway"];
-            NSInteger res = [alert runModal];
-            if ([[alert suppressionButton] state] == NSOnState) {
-              [defaults setBool:YES forKey:supressKey];
-            }
-            if (res == NSAlertFirstButtonReturn) {
-              [[NSWorkspace sharedWorkspace] openURL:[NSURL URLWithString:HOMEPAGE_URL]];
-              // cancel
-              return noErr;
-            }
-          }
+        if ([mainVersion rangeOfString:FINDER_UNSUPPORTED_VERSION].length > 0) {
+          NSUserNotification *notification = [[NSUserNotification alloc] init];
+          notification.title = [NSString stringWithFormat:@"Some TotalFinder features are disabled."];
+          notification.informativeText = [NSString stringWithFormat:@"Please visit http://totalfinder.binaryage.com/mavericks for more info on our progress."];
+          [[NSUserNotificationCenter defaultUserNotificationCenter] deliverNotification:notification];
         }
         
         // warn about non-tested minor versions into the log only
