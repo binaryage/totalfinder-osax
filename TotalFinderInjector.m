@@ -72,10 +72,13 @@ static bool totalFinderAlreadyLoaded = false;
 
 static void broadcastSucessfulInjection() {
   pid_t pid = [[NSProcessInfo processInfo] processIdentifier];
+
   [[NSDistributedNotificationCenter defaultCenter]postNotificationName:TOTALFINDER_INJECTED_NOTIFICATION
                                                                 object:[[NSBundle mainBundle]bundleIdentifier]
-                                                              userInfo:@{@"pid": @(pid)}];
+                                                              userInfo:@{ @"pid": @(pid) }
+  ];
 }
+
 __attribute__((constructor))
 static void autoInitializer() {
   enteredHandler = false;
@@ -84,14 +87,16 @@ static void autoInitializer() {
   // we give applescript subsystem some time to do its work and enter some handler
   // if it fails, we assume init event was requested and execute HandleInitEvent
   dispatch_after(delay, dispatch_get_main_queue(), ^(void) {
-    if (enteredHandler) {
-      return; // applescript subsystem was able to execute one of our handlers, nothing to do
-    }
-    AppleEvent err;
-    AECreateAppleEvent('BATF', 'err-', NULL, kAutoGenerateReturnID, kAnyTransactionID, &err);
-    HandleInitEvent(NULL, &err, 0);
-    AEDisposeDesc(&err);
-  });
+        if (enteredHandler) {
+          return; // applescript subsystem was able to execute one of our handlers, nothing to do
+        }
+        AppleEvent err;
+        AECreateAppleEvent('BATF', 'err-', NULL, kAutoGenerateReturnID, kAnyTransactionID, &err);
+        HandleInitEvent(NULL, &err, 0);
+        AEDisposeDesc(&err);
+      }
+
+  );
 }
 
 // SIMBL-compatible interface
@@ -139,52 +144,52 @@ EXPORT OSErr HandleInitEvent(const AppleEvent* ev, AppleEvent* reply, long refco
     @autoreleasepool {
       NSBundle* injectorBundle = [NSBundle bundleForClass:[TotalFinderInjector class]];
       NSString* injectorVersion = [injectorBundle objectForInfoDictionaryKey:@"CFBundleVersion"];
-      
+
       if (!injectorVersion || ![injectorVersion isKindOfClass:[NSString class]]) {
         reportError(reply, [NSString stringWithFormat:@"Unable to determine TotalFinderInjector version!"]);
         return 7;
       }
-      
+
       NSLog(@"TotalFinderInjector v%@ received init event", injectorVersion);
-      
+
       NSString* bundleName = @"TotalFinder";
       NSString* targetAppName = @"Finder";
       NSString* maxVersion = FINDER_MAX_TESTED_VERSION;
       NSString* minVersion = FINDER_MIN_TESTED_VERSION;
-      
+
       if (totalFinderAlreadyLoaded) {
         NSLog(@"TotalFinderInjector: %@ has been already loaded. Ignoring this request.", bundleName);
         return noErr;
       }
-      
+
       @try {
         NSBundle* mainBundle = [NSBundle mainBundle];
         if (!mainBundle) {
           reportError(reply, [NSString stringWithFormat:@"Unable to locate main %@ bundle!", targetAppName]);
           return 4;
         }
-        
+
         NSString* mainVersion = [mainBundle objectForInfoDictionaryKey:@"CFBundleVersion"];
         if (!mainVersion || ![mainVersion isKindOfClass:[NSString class]]) {
           reportError(reply, [NSString stringWithFormat:@"Unable to determine %@ version!", targetAppName]);
           return 5;
         }
-        
+
         // some future versions are explicitely unsupported
         if ([mainVersion rangeOfString:FINDER_UNSUPPORTED_VERSION].length > 0) {
-          NSUserNotification *notification = [[NSUserNotification alloc] init];
+          NSUserNotification* notification = [[NSUserNotification alloc] init];
           notification.title = [NSString stringWithFormat:@"Some TotalFinder features are disabled."];
           notification.informativeText = [NSString stringWithFormat:@"Please visit http://totalfinder.binaryage.com/mavericks for more info on our progress."];
           [[NSUserNotificationCenter defaultUserNotificationCenter] deliverNotification:notification];
         }
-        
+
         // warn about non-tested minor versions into the log only
         TFStandardVersionComparator* comparator = [TFStandardVersionComparator defaultComparator];
         if (([comparator compareVersion:mainVersion toVersion:maxVersion] == NSOrderedDescending) ||
             ([comparator compareVersion:mainVersion toVersion:minVersion] == NSOrderedAscending)) {
           NSLog(@"You have %@ version %@. But %@ was properly tested only with %@ versions in range %@ - %@.", targetAppName, mainVersion, bundleName, targetAppName, minVersion, maxVersion);
         }
-        
+
         NSBundle* totalFinderInjectorBundle = [NSBundle bundleForClass:[TotalFinderInjector class]];
         NSString* totalFinderLocation = [totalFinderInjectorBundle pathForResource:bundleName ofType:@"bundle"];
         NSBundle* pluginBundle = [NSBundle bundleWithPath:totalFinderLocation];
@@ -192,7 +197,7 @@ EXPORT OSErr HandleInitEvent(const AppleEvent* ev, AppleEvent* reply, long refco
           reportError(reply, [NSString stringWithFormat:@"Unable to create bundle from path: %@ [%@]", totalFinderLocation, totalFinderInjectorBundle]);
           return 2;
         }
-        
+
         NSError* error;
         if (![pluginBundle loadAndReturnError:&error]) {
           reportError(reply, [NSString stringWithFormat:@"Unable to load bundle from path: %@ error: %@", totalFinderLocation, [error localizedDescription]]);
@@ -208,15 +213,15 @@ EXPORT OSErr HandleInitEvent(const AppleEvent* ev, AppleEvent* reply, long refco
           NSLog(@"TotalFinderInjector: Installing %@ ...", bundleName);
           [principalClassObject install];
         }
-        
+
         totalFinderAlreadyLoaded = true;
         broadcastSucessfulInjection();
-        
+
         return noErr;
       } @catch (NSException* exception) {
         reportError(reply, [NSString stringWithFormat:@"Failed to load %@ with exception: %@", bundleName, exception]);
       }
-      
+
       return 1;
     }
   }
