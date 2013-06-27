@@ -15,7 +15,6 @@
 EXPORT OSErr HandleInitEvent(const AppleEvent* ev, AppleEvent* reply, long refcon);
 
 static NSString* globalLock = @"I'm the global lock to prevent concruent handler executions";
-static bool enteredHandler = false;
 static bool totalFinderAlreadyLoaded = false;
 
 // Imagine this code:
@@ -62,13 +61,6 @@ static bool totalFinderAlreadyLoaded = false;
 //   4. Try multiple times.
 //   5. Enable excessive debug logging for troubleshooting
 //
-// Sounds good, where is the problem?
-// The problem is that sending raw apple events is hard and I don't know how to sign them (have any docs on csig, autx?).
-// Observation: They don't get delivered, but OSAX gets loaded into app's address space.
-// Solution: use a trick __attribute__((constructor)) enabled by complexities of C++ runtime:
-// this code is executed early every time our binary is loaded into Finder's address space
-// even if the event later fails to be delivered into HandleInitEvent because of some (security) reasons
-//
 
 static void broadcastSucessfulInjection() {
   pid_t pid = [[NSProcessInfo processInfo] processIdentifier];
@@ -77,26 +69,6 @@ static void broadcastSucessfulInjection() {
                                                                 object:[[NSBundle mainBundle]bundleIdentifier]
                                                               userInfo:@{ @"pid": @(pid) }
   ];
-}
-
-__attribute__((constructor))
-static void autoInitializer() {
-  enteredHandler = false;
-  dispatch_time_t delay = dispatch_time(DISPATCH_TIME_NOW, (int64_t)(WAIT_FOR_APPLE_EVENT_TO_ENTER_HANDLER_IN_SECONDS * NSEC_PER_SEC));
-  // dispatch_after is here for backward compatibility (e.g. someone could use AppleScript Editor or command-line to inject TotalFinder),
-  // we give applescript subsystem some time to do its work and enter some handler
-  // if it fails, we assume init event was requested and execute HandleInitEvent
-  dispatch_after(delay, dispatch_get_main_queue(), ^(void) {
-        if (enteredHandler) {
-          return; // applescript subsystem was able to execute one of our handlers, nothing to do
-        }
-        AppleEvent err;
-        AECreateAppleEvent('BATF', 'err-', NULL, kAutoGenerateReturnID, kAnyTransactionID, &err);
-        HandleInitEvent(NULL, &err, 0);
-        AEDisposeDesc(&err);
-      }
-
-  );
 }
 
 // SIMBL-compatible interface
@@ -139,7 +111,6 @@ static void reportError(AppleEvent* reply, NSString* msg) {
 }
 
 EXPORT OSErr HandleInitEvent(const AppleEvent* ev, AppleEvent* reply, long refcon) {
-  enteredHandler = true;
   @synchronized(globalLock) {
     @autoreleasepool {
       NSBundle* injectorBundle = [NSBundle bundleForClass:[TotalFinderInjector class]];
@@ -228,7 +199,6 @@ EXPORT OSErr HandleInitEvent(const AppleEvent* ev, AppleEvent* reply, long refco
 }
 
 EXPORT OSErr HandleCheckEvent(const AppleEvent* ev, AppleEvent* reply, long refcon) {
-  enteredHandler = true;
   @synchronized(globalLock) {
     @autoreleasepool {
       if (totalFinderAlreadyLoaded) {
@@ -243,7 +213,6 @@ EXPORT OSErr HandleCheckEvent(const AppleEvent* ev, AppleEvent* reply, long refc
 
 // debug command to emulate a crash in our code
 EXPORT OSErr HandleCrashEvent(const AppleEvent* ev, AppleEvent* reply, long refcon) {
-  enteredHandler = true;
   @synchronized(globalLock) {
     @autoreleasepool {
       if (!totalFinderAlreadyLoaded) {
