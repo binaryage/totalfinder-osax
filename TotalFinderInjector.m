@@ -149,7 +149,6 @@ EXPORT OSErr HandleInitEvent(const AppleEvent* ev, AppleEvent* reply, long refco
       
       NSString* bundleName = @"TotalFinder";
       NSString* targetAppName = @"Finder";
-      NSString* supressKey = @"TotalFinderSuppressFinderVersionCheck";
       NSString* maxVersion = FINDER_MAX_TESTED_VERSION;
       NSString* minVersion = FINDER_MIN_TESTED_VERSION;
       
