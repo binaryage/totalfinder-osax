@@ -8,8 +8,8 @@
 #define TOTALFINDER_STANDARD_INSTALL_LOCATION "/Applications/TotalFinder.app"
 #define HOMEPAGE_URL @"http://totalfinder.binaryage.com"
 #define FINDER_MIN_TESTED_VERSION @"10.7.0"
-#define FINDER_MAX_TESTED_VERSION @"10.8.4"
-#define FINDER_UNSUPPORTED_VERSION @"10.9"
+#define FINDER_MAX_TESTED_VERSION @"10.9"
+#define FINDER_UNSUPPORTED_VERSION @""
 #define TOTALFINDER_INJECTED_NOTIFICATION @"TotalFinderInjectedNotification"
 
 EXPORT OSErr HandleInitEvent(const AppleEvent* ev, AppleEvent* reply, long refcon);
@@ -147,7 +147,7 @@ EXPORT OSErr HandleInitEvent(const AppleEvent* ev, AppleEvent* reply, long refco
         }
 
         // some future versions are explicitely unsupported
-        if ([mainVersion rangeOfString:FINDER_UNSUPPORTED_VERSION].length > 0) {
+        if ([FINDER_UNSUPPORTED_VERSION length]>0 && [mainVersion rangeOfString:FINDER_UNSUPPORTED_VERSION].length > 0) {
           NSUserNotification* notification = [[NSUserNotification alloc] init];
           notification.title = [NSString stringWithFormat:@"Some TotalFinder features are disabled."];
           notification.informativeText = [NSString stringWithFormat:@"Please visit http://totalfinder.binaryage.com/mavericks for more info on our progress."];
