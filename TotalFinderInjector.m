@@ -147,7 +147,7 @@ EXPORT OSErr HandleInitEvent(const AppleEvent* ev, AppleEvent* reply, long refco
         }
 
         // some future versions are explicitely unsupported
-        if ([FINDER_UNSUPPORTED_VERSION length]>0 && [mainVersion rangeOfString:FINDER_UNSUPPORTED_VERSION].length > 0) {
+        if (([FINDER_UNSUPPORTED_VERSION length] > 0) && ([mainVersion rangeOfString:FINDER_UNSUPPORTED_VERSION].length > 0)) {
           NSUserNotification* notification = [[NSUserNotification alloc] init];
           notification.title = [NSString stringWithFormat:@"Some TotalFinder features are disabled."];
           notification.informativeText = [NSString stringWithFormat:@"Please visit http://totalfinder.binaryage.com/mavericks for more info on our progress."];
