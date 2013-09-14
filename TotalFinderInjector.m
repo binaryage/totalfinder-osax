@@ -84,10 +84,6 @@ static void broadcastSucessfulInjection() {
 @implementation TotalFinderInjector { }
 @end
 
-typedef struct {
-  NSString* location;
-} configuration;
-
 static OSErr AEPutParamString(AppleEvent* event, AEKeyword keyword, NSString* string) {
   UInt8* textBuf;
   CFIndex length, maxBytes, actualBytes;
@@ -228,4 +224,5 @@ EXPORT OSErr HandleCrashEvent(const AppleEvent* ev, AppleEvent* reply, long refc
       [shell crashMe];
     }
   }
+  __builtin_unreachable();
 }
