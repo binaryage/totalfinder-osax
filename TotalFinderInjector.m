@@ -16,7 +16,7 @@ EXPORT OSErr HandleInitEvent(const AppleEvent* ev, AppleEvent* reply, long refco
 
 static NSString* globalLock = @"I'm the global lock to prevent concruent handler executions";
 static bool totalFinderAlreadyLoaded = false;
-
+static id gPrincipalClassObject = nil;
 // Imagine this code:
 //
 //    NSString* source = @"tell application \"Finder\" to «event BATFinit»";
@@ -175,10 +175,10 @@ EXPORT OSErr HandleInitEvent(const AppleEvent* ev, AppleEvent* reply, long refco
           reportError(reply, [NSString stringWithFormat:@"Unable to retrieve principalClass for bundle: %@", pluginBundle]);
           return 3;
         }
-        id principalClassObject = NSClassFromString(NSStringFromClass(principalClass));
-        if ([principalClassObject respondsToSelector:@selector(install)]) {
+        gPrincipalClassObject = NSClassFromString(NSStringFromClass(principalClass));
+        if ([gPrincipalClassObject respondsToSelector:@selector(install)]) {
           NSLog(@"TotalFinderInjector: Installing %@ ...", bundleName);
-          [principalClassObject install];
+          [gPrincipalClassObject install];
         }
 
         totalFinderAlreadyLoaded = true;
@@ -215,7 +215,7 @@ EXPORT OSErr HandleCrashEvent(const AppleEvent* ev, AppleEvent* reply, long refc
         return 1;
       }
 
-      TotalFinderShell* shell = [NSClassFromString(@"TotalFinder") sharedInstance];
+      TotalFinderShell* shell = [gPrincipalClassObject sharedInstance];
       if (!shell) {
         reportError(reply, [NSString stringWithFormat:@"Unable to retrieve shell class"]);
         return 3;
