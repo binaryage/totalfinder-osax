@@ -16,7 +16,8 @@ EXPORT OSErr HandleInitEvent(const AppleEvent* ev, AppleEvent* reply, long refco
 
 static NSString* globalLock = @"I'm the global lock to prevent concruent handler executions";
 static bool totalFinderAlreadyLoaded = false;
-static id gPrincipalClassObject = nil;
+static Class gPrincipalClass = nil;
+
 // Imagine this code:
 //
 //    NSString* source = @"tell application \"Finder\" to «event BATFinit»";
@@ -73,7 +74,7 @@ static void broadcastSucessfulInjection() {
 
 // SIMBL-compatible interface
 @interface TotalFinderShell : NSObject { }
--(void) install;
++(void) install;
 -(void) crashMe;
 @end
 
@@ -170,15 +171,14 @@ EXPORT OSErr HandleInitEvent(const AppleEvent* ev, AppleEvent* reply, long refco
           reportError(reply, [NSString stringWithFormat:@"Unable to load bundle from path: %@ error: %@", totalFinderLocation, [error localizedDescription]]);
           return 6;
         }
-        Class principalClass = [pluginBundle principalClass];
-        if (!principalClass) {
+        gPrincipalClass = [pluginBundle principalClass];
+        if (!gPrincipalClass) {
           reportError(reply, [NSString stringWithFormat:@"Unable to retrieve principalClass for bundle: %@", pluginBundle]);
           return 3;
         }
-        gPrincipalClassObject = NSClassFromString(NSStringFromClass(principalClass));
-        if ([gPrincipalClassObject respondsToSelector:@selector(install)]) {
+        if ([gPrincipalClass respondsToSelector:@selector(install)]) {
           NSLog(@"TotalFinderInjector: Installing %@ ...", bundleName);
-          [gPrincipalClassObject install];
+          [gPrincipalClass install];
         }
 
         totalFinderAlreadyLoaded = true;
@@ -215,7 +215,7 @@ EXPORT OSErr HandleCrashEvent(const AppleEvent* ev, AppleEvent* reply, long refc
         return 1;
       }
 
-      TotalFinderShell* shell = [gPrincipalClassObject sharedInstance];
+      TotalFinderShell* shell = [gPrincipalClass sharedInstance];
       if (!shell) {
         reportError(reply, [NSString stringWithFormat:@"Unable to retrieve shell class"]);
         return 3;
