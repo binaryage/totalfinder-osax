@@ -1,5 +1,3 @@
-#import <Cocoa/Cocoa.h>
-
 #import "TFStandardVersionComparator.h"
 
 #define EXPORT __attribute__((visibility("default")))
