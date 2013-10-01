@@ -9,8 +9,6 @@
 /* Begin PBXBuildFile section */
 		8D576314048677EA00EA77CD /* CoreFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0AA1909FFE8422F4C02AAC07 /* CoreFoundation.framework */; };
 		8D5B49A804867FD3000E48DA /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 8D5B49A704867FD3000E48DA /* InfoPlist.strings */; };
-		D698E4C617FA6EAC004B2FD6 /* TotalFinder-osax_Debug_TotalFinder.xcconfig in Resources */ = {isa = PBXBuildFile; fileRef = D698E4C417FA6EAC004B2FD6 /* TotalFinder-osax_Debug_TotalFinder.xcconfig */; };
-		D698E4C717FA6EAC004B2FD6 /* TotalFinder-osax_Release_TotalFinder.xcconfig in Resources */ = {isa = PBXBuildFile; fileRef = D698E4C517FA6EAC004B2FD6 /* TotalFinder-osax_Release_TotalFinder.xcconfig */; };
 		D6ACBEA2117B7D5600F6691C /* TotalFinderInjector.m in Sources */ = {isa = PBXBuildFile; fileRef = D6ACBE9E117B7D5600F6691C /* TotalFinderInjector.m */; };
 		D6ACBEA3117B7D5600F6691C /* TFStandardVersionComparator.m in Sources */ = {isa = PBXBuildFile; fileRef = D6ACBEA0117B7D5600F6691C /* TFStandardVersionComparator.m */; };
 		D6ACBEA5117B7D6100F6691C /* TotalFinderInjector.sdef in Resources */ = {isa = PBXBuildFile; fileRef = D6ACBEA4117B7D6100F6691C /* TotalFinderInjector.sdef */; };
@@ -20,7 +18,7 @@
 		089C167EFE841241C02AAC07 /* English */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.strings; name = English; path = English.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		0AA1909FFE8422F4C02AAC07 /* CoreFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreFoundation.framework; path = /System/Library/Frameworks/CoreFoundation.framework; sourceTree = "<absolute>"; };
 		8D576317048677EA00EA77CD /* TotalFinder-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "TotalFinder-Info.plist"; sourceTree = "<group>"; };
-		D60A992314CE37030061AD6D /* TotalFinder.bundle */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = TotalFinder.bundle; sourceTree = BUILT_PRODUCTS_DIR; };
+		D60A992314CE37030061AD6D /* .bundle */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = .bundle; sourceTree = BUILT_PRODUCTS_DIR; };
 		D672258A17FA6DC100D3ACEA /* TotalFinder-Prefix.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "TotalFinder-Prefix.pch"; sourceTree = "<group>"; };
 		D698E4C417FA6EAC004B2FD6 /* TotalFinder-osax_Debug_TotalFinder.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; name = "TotalFinder-osax_Debug_TotalFinder.xcconfig"; path = "TotalFinder-osax.xcconfigs/TotalFinder-osax_Debug_TotalFinder.xcconfig"; sourceTree = "<group>"; };
 		D698E4C517FA6EAC004B2FD6 /* TotalFinder-osax_Release_TotalFinder.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; name = "TotalFinder-osax_Release_TotalFinder.xcconfig"; path = "TotalFinder-osax.xcconfigs/TotalFinder-osax_Release_TotalFinder.xcconfig"; sourceTree = "<group>"; };
@@ -91,7 +89,7 @@
 		D60A992414CE37030061AD6D /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				D60A992314CE37030061AD6D /* TotalFinder.bundle */,
+				D60A992314CE37030061AD6D /* .bundle */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -123,7 +121,7 @@
 			name = TotalFinder;
 			productInstallPath = "$(HOME)/Library/Bundles";
 			productName = "TotalFinder-osax";
-			productReference = D60A992314CE37030061AD6D /* TotalFinder.bundle */;
+			productReference = D60A992314CE37030061AD6D /* .bundle */;
 			productType = "com.apple.product-type.bundle";
 		};
 /* End PBXNativeTarget section */
@@ -161,8 +159,6 @@
 			files = (
 				8D5B49A804867FD3000E48DA /* InfoPlist.strings in Resources */,
 				D6ACBEA5117B7D6100F6691C /* TotalFinderInjector.sdef in Resources */,
-				D698E4C617FA6EAC004B2FD6 /* TotalFinder-osax_Debug_TotalFinder.xcconfig in Resources */,
-				D698E4C717FA6EAC004B2FD6 /* TotalFinder-osax_Release_TotalFinder.xcconfig in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
