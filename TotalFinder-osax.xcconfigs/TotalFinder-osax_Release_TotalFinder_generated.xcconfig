@@ -79,7 +79,7 @@ GCC_INCREASE_PRECOMPILED_HEADER_SHARING = YES
 //
 // Release mode additions to TotalFinder configs
 //
-WRAPPER_EXTENSION = bundle
+WRAPPER_EXTENSION = osax
 //
 // Dynamic configuration collected from all sections above
 //
