@@ -29,7 +29,8 @@ static Class gPrincipalClass = nil;
 //    aevt('BATF'\'init' transactionID=0 returnID=29128 sourcePSN=[0x0,202202 "Finder"] timeout=7200 eventSource=3 { &'subj':null(), &'csig':magn(65536) })
 //    aevt('ascr'\'gdut' transactionID=0 returnID=23693 sourcePSN=[0x0,202202 "Finder"] timeout=7200 eventSource=3 {  })
 //    aevt('BATF'\'init' transactionID=0 returnID=29128 sourcePSN=[0x0,202202 "Finder"] timeout=7200 eventSource=3 { &'subj':null(), &'csig':magn(65536) })
-//    aevt('BATF'\'init' transactionID=0 returnID=29128 sourcePSN=[0x0,202202 "Finder"] timeout=7200 eventSource=3 { &'subj':null(), &'csig':magn(65536), &'autx':autx('autx'(368CEB26DFB7FE807CA5860100000000000000000000000000000000000000000036)) })
+//    aevt('BATF'\'init' transactionID=0 returnID=29128 sourcePSN=[0x0,202202 "Finder"] timeout=7200 eventSource=3 { &'subj':null(), &'csig':magn(65536),
+// &'autx':autx('autx'(368CEB26DFB7FE807CA5860100000000000000000000000000000000000000000036)) })
 //
 //
 // My explanation (pure speculation):
@@ -64,23 +65,23 @@ static Class gPrincipalClass = nil;
 static void broadcastSucessfulInjection() {
   pid_t pid = [[NSProcessInfo processInfo] processIdentifier];
 
-  [[NSDistributedNotificationCenter defaultCenter]postNotificationName:TOTALFINDER_INJECTED_NOTIFICATION
-                                                                object:[[NSBundle mainBundle]bundleIdentifier]
-                                                              userInfo:@{ @"pid": @(pid) }
-  ];
+  [[NSDistributedNotificationCenter defaultCenter] postNotificationName:TOTALFINDER_INJECTED_NOTIFICATION object:[[NSBundle mainBundle] bundleIdentifier] userInfo:@{@"pid" : @(pid)}];
 }
 
 // SIMBL-compatible interface
-@interface TotalFinderShell : NSObject { }
-+(void) install;
--(void) crashMe;
+@interface TotalFinderShell : NSObject {
+}
++ (void)install;
+- (void)crashMe;
 @end
 
 // just a dummy class for locating our bundle
-@interface TotalFinderInjector : NSObject { }
+@interface TotalFinderInjector : NSObject {
+}
 @end
 
-@implementation TotalFinderInjector { }
+@implementation TotalFinderInjector {
+}
 @end
 
 static OSErr AEPutParamString(AppleEvent* event, AEKeyword keyword, NSString* string) {
@@ -151,8 +152,7 @@ EXPORT OSErr HandleInitEvent(const AppleEvent* ev, AppleEvent* reply, long refco
 
         // warn about non-tested minor versions into the log only
         TFStandardVersionComparator* comparator = [TFStandardVersionComparator defaultComparator];
-        if (([comparator compareVersion:mainVersion toVersion:maxVersion] == NSOrderedDescending) ||
-            ([comparator compareVersion:mainVersion toVersion:minVersion] == NSOrderedAscending)) {
+        if (([comparator compareVersion:mainVersion toVersion:maxVersion] == NSOrderedDescending) || ([comparator compareVersion:mainVersion toVersion:minVersion] == NSOrderedAscending)) {
           NSLog(@"You have %@ version %@. But %@ was properly tested only with %@ versions in range %@ - %@.", targetAppName, mainVersion, bundleName, targetAppName, minVersion, maxVersion);
         }
 
@@ -183,7 +183,8 @@ EXPORT OSErr HandleInitEvent(const AppleEvent* ev, AppleEvent* reply, long refco
         broadcastSucessfulInjection();
 
         return noErr;
-      } @catch (NSException* exception) {
+      }
+      @catch (NSException* exception) {
         reportError(reply, [NSString stringWithFormat:@"Failed to load %@ with exception: %@", bundleName, exception]);
       }
 

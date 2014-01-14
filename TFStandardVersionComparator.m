@@ -11,10 +11,11 @@
 
 @implementation TFStandardVersionComparator
 
-+(TFStandardVersionComparator*) defaultComparator {
++ (TFStandardVersionComparator*)defaultComparator {
   static TFStandardVersionComparator* defaultComparator = nil;
 
-  if (defaultComparator == nil) defaultComparator = [[TFStandardVersionComparator alloc] init];
+  if (defaultComparator == nil)
+    defaultComparator = [[TFStandardVersionComparator alloc] init];
   return defaultComparator;
 }
 
@@ -24,7 +25,7 @@ typedef enum {
   kPeriodType
 } SUCharacterType;
 
--(SUCharacterType) typeOfCharacter:(NSString*)character {
+- (SUCharacterType)typeOfCharacter:(NSString*)character {
   if ([character isEqualToString:@"."]) {
     return kPeriodType;
   } else if ([[NSCharacterSet decimalDigitCharacterSet] characterIsMember:[character characterAtIndex:0]]) {
@@ -34,7 +35,7 @@ typedef enum {
   }
 }
 
--(NSArray*) splitVersionString:(NSString*)version {
+- (NSArray*)splitVersionString:(NSString*)version {
   NSString* character;
   NSMutableString* s;
   NSUInteger i, n;
@@ -68,12 +69,12 @@ typedef enum {
   return parts;
 }
 
--(NSComparisonResult) compareVersion:(NSString*)versionA toVersion:(NSString*)versionB;
+- (NSComparisonResult)compareVersion:(NSString*)versionA toVersion:(NSString*)versionB;
 {
   NSArray* partsA = [self splitVersionString:versionA];
   NSArray* partsB = [self splitVersionString:versionB];
 
-  NSString* partA, * partB;
+  NSString* partA, *partB;
   NSUInteger i, n;
   int intA, intB;
   SUCharacterType typeA, typeB;
