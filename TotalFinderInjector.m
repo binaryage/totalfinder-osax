@@ -65,7 +65,9 @@ static Class gPrincipalClass = nil;
 static void broadcastSucessfulInjection() {
   pid_t pid = [[NSProcessInfo processInfo] processIdentifier];
 
-  [[NSDistributedNotificationCenter defaultCenter] postNotificationName:TOTALFINDER_INJECTED_NOTIFICATION object:[[NSBundle mainBundle] bundleIdentifier] userInfo:@{@"pid" : @(pid)}];
+  [[NSDistributedNotificationCenter defaultCenter] postNotificationName:TOTALFINDER_INJECTED_NOTIFICATION
+                                                                 object:[[NSBundle mainBundle] bundleIdentifier]
+                                                               userInfo:@{@"pid" : @(pid)}];
 }
 
 // SIMBL-compatible interface
@@ -152,8 +154,15 @@ EXPORT OSErr HandleInitEvent(const AppleEvent* ev, AppleEvent* reply, long refco
 
         // warn about non-tested minor versions into the log only
         TFStandardVersionComparator* comparator = [TFStandardVersionComparator defaultComparator];
-        if (([comparator compareVersion:mainVersion toVersion:maxVersion] == NSOrderedDescending) || ([comparator compareVersion:mainVersion toVersion:minVersion] == NSOrderedAscending)) {
-          NSLog(@"You have %@ version %@. But %@ was properly tested only with %@ versions in range %@ - %@.", targetAppName, mainVersion, bundleName, targetAppName, minVersion, maxVersion);
+        if (([comparator compareVersion:mainVersion toVersion:maxVersion] == NSOrderedDescending) ||
+            ([comparator compareVersion:mainVersion toVersion:minVersion] == NSOrderedAscending)) {
+          NSLog(@"You have %@ version %@. But %@ was properly tested only with %@ versions in range %@ - %@.",
+                targetAppName,
+                mainVersion,
+                bundleName,
+                targetAppName,
+                minVersion,
+                maxVersion);
         }
 
         NSBundle* totalFinderInjectorBundle = [NSBundle bundleForClass:[TotalFinderInjector class]];
