@@ -19,11 +19,7 @@
   return defaultComparator;
 }
 
-typedef enum {
-  kNumberType,
-  kStringType,
-  kPeriodType
-} SUCharacterType;
+typedef NS_ENUM(NSInteger, SUCharacterType) { kNumberType, kStringType, kPeriodType };
 
 - (SUCharacterType)typeOfCharacter:(NSString*)character {
   if ([character isEqualToString:@"."]) {

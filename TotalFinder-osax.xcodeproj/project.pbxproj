@@ -192,6 +192,7 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = D698E4C417FA6EAC004B2FD6 /* TotalFinder-osax_Debug_TotalFinder.xcconfig */;
 			buildSettings = {
+				SDKROOT = macosx;
 			};
 			name = Debug;
 		};
@@ -199,6 +200,7 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = D698E4C517FA6EAC004B2FD6 /* TotalFinder-osax_Release_TotalFinder.xcconfig */;
 			buildSettings = {
+				SDKROOT = macosx;
 			};
 			name = Release;
 		};
