@@ -1,4 +1,4 @@
-//!bagen generate binaryage TotalFinder-osax Debug TotalFinder > TotalFinder-osax_Debug_TotalFinder_generated.xcconfig
+//!bagen generate binaryage TotalFinder-osax Debug TotalFinder
 //
 // this file should be set as Debug configuration for target TotalFinder in TotalFinder-osax.xcodeproj
 
@@ -6,5 +6,3 @@
 #include "TotalFinder-osax_Debug_TotalFinder_generated.xcconfig"
 
 // here you can follow with your custom settings overries if needed
-
-

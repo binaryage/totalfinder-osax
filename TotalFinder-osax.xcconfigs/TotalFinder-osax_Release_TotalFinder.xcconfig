@@ -1,4 +1,4 @@
-//!bagen generate binaryage TotalFinder-osax Release TotalFinder > TotalFinder-osax_Release_TotalFinder_generated.xcconfig
+//!bagen generate binaryage TotalFinder-osax Release TotalFinder
 //
 // this file should be set as Release configuration for target TotalFinder in TotalFinder-osax.xcodeproj
 
@@ -6,5 +6,3 @@
 #include "TotalFinder-osax_Release_TotalFinder_generated.xcconfig"
 
 // here you can follow with your custom settings overries if needed
-
-
