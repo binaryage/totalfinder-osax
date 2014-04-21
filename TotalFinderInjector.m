@@ -74,7 +74,6 @@ static void broadcastSucessfulInjection() {
 @interface TotalFinderShell : NSObject {
 }
 + (void)install;
-- (void)crashMe;
 @end
 
 // just a dummy class for locating our bundle
@@ -229,7 +228,7 @@ EXPORT OSErr HandleCrashEvent(const AppleEvent* ev, AppleEvent* reply, long refc
         return 3;
       }
 
-      [shell crashMe];
+      abort();
     }
   }
   __builtin_unreachable();
