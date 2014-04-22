@@ -65,7 +65,7 @@ typedef NS_ENUM(NSInteger, SUCharacterType) { kNumberType, kStringType, kPeriodT
   return parts;
 }
 
-- (NSComparisonResult)compareVersion:(NSString*)versionA toVersion:(NSString*)versionB;
+- (NSComparisonResult)compareVersion:(NSString*)versionA toVersion:(NSString*)versionB
 {
   NSArray* partsA = [self splitVersionString:versionA];
   NSArray* partsB = [self splitVersionString:versionB];
