@@ -231,5 +231,4 @@ EXPORT OSErr HandleCrashEvent(const AppleEvent* ev, AppleEvent* reply, long refc
       abort();
     }
   }
-  __builtin_unreachable();
 }

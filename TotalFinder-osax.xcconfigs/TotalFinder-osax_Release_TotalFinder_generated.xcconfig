@@ -83,6 +83,6 @@ GCC_SYMBOLS_PRIVATE_EXTERN = YES
 //
 // Dynamic configuration collected from all sections above
 //
-WARNING_CFLAGS = -Wno-gcc-compat -Wextra -Wno-unused-parameter -Wno-unused-variable -Wthread-safety -Wthread-safety-beta
+WARNING_CFLAGS = -Wextra -Wself-assign -Wno-gcc-compat -Wno-unused-parameter -Wstrict-prototypes -Wunreachable-code -Wunused-member-function -Wuninitialized -Wsuper-class-method-mismatch -Warc-abi -Warc-retain-cycles -Warc-unsafe-retained-assign -Warc-non-pod-memaccess -Wbind-to-temporary-copy -Wno-unused-variable -Wthread-safety -Wthread-safety-beta
 GCC_PREPROCESSOR_DEFINITIONS = NDEBUG=1 NS_BLOCK_ASSERTIONS=1
 OTHER_LDFLAGS = -undefined dynamic_lookup -headerpad_max_install_names
