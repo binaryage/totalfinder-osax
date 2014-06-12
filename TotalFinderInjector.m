@@ -7,8 +7,9 @@
 #define HOMEPAGE_URL @"http://totalfinder.binaryage.com"
 #define FINDER_MIN_TESTED_VERSION @"10.7.0"
 #define FINDER_MAX_TESTED_VERSION @"10.9.4"
-#define FINDER_UNSUPPORTED_VERSION @""
+#define FINDER_UNSUPPORTED_VERSION @"10.10"
 #define TOTALFINDER_INJECTED_NOTIFICATION @"TotalFinderInjectedNotification"
+#define TOTALFINDER_COMPATIBILITY_PAGE @"http://totalfinder.binaryage.com/compatibility#yosemite"
 
 EXPORT OSErr HandleInitEvent(const AppleEvent* ev, AppleEvent* reply, long refcon);
 
@@ -81,8 +82,7 @@ static void broadcastSucessfulInjection() {
 }
 @end
 
-@implementation TotalFinderInjector {
-}
+@implementation TotalFinderInjector
 @end
 
 static OSErr AEPutParamString(AppleEvent* event, AEKeyword keyword, NSString* string) {
@@ -146,9 +146,10 @@ EXPORT OSErr HandleInitEvent(const AppleEvent* ev, AppleEvent* reply, long refco
         // some future versions are explicitely unsupported
         if (([FINDER_UNSUPPORTED_VERSION length] > 0) && ([mainVersion rangeOfString:FINDER_UNSUPPORTED_VERSION].length > 0)) {
           NSUserNotification* notification = [[NSUserNotification alloc] init];
-          notification.title = [NSString stringWithFormat:@"Some TotalFinder features are disabled."];
-          notification.informativeText = [NSString stringWithFormat:@"Please visit http://totalfinder.binaryage.com/mavericks for more info on our progress."];
-          [[NSUserNotificationCenter defaultUserNotificationCenter] deliverNotification:notification];
+          notification.title = [NSString stringWithFormat:@"TotalFinder Yosemite compatibility"];
+          notification.informativeText = [NSString stringWithFormat:@"All features should work, but you could experience rough edges. We're working on it.\nhttp://totalfinder.binaryage.com/compatibility"];
+          NSUserNotificationCenter* notificationCenter = [NSUserNotificationCenter defaultUserNotificationCenter];
+          [notificationCenter deliverNotification:notification];
         }
 
         // warn about non-tested minor versions into the log only
