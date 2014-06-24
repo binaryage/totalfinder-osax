@@ -16,7 +16,7 @@
 /* Begin PBXFileReference section */
 		089C167EFE841241C02AAC07 /* English */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.strings; name = English; path = English.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		8D576317048677EA00EA77CD /* TotalFinder-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "TotalFinder-Info.plist"; sourceTree = "<group>"; };
-		D60A992314CE37030061AD6D /* .bundle */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = .bundle; sourceTree = BUILT_PRODUCTS_DIR; };
+		D60A992314CE37030061AD6D /* TotalFinder.osax */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = TotalFinder.osax; sourceTree = BUILT_PRODUCTS_DIR; };
 		D618B015195996BD004F2F20 /* OSAX_Debug_TotalFinder.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; name = OSAX_Debug_TotalFinder.xcconfig; path = OSAX.xcconfigs/OSAX_Debug_TotalFinder.xcconfig; sourceTree = "<group>"; };
 		D618B016195996BD004F2F20 /* OSAX_Release_TotalFinder.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; name = OSAX_Release_TotalFinder.xcconfig; path = OSAX.xcconfigs/OSAX_Release_TotalFinder.xcconfig; sourceTree = "<group>"; };
 		D672258A17FA6DC100D3ACEA /* TotalFinder-Prefix.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "TotalFinder-Prefix.pch"; sourceTree = "<group>"; };
@@ -77,7 +77,7 @@
 		D60A992414CE37030061AD6D /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				D60A992314CE37030061AD6D /* .bundle */,
+				D60A992314CE37030061AD6D /* TotalFinder.osax */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -109,7 +109,7 @@
 			name = TotalFinder;
 			productInstallPath = "$(HOME)/Library/Bundles";
 			productName = OSAX;
-			productReference = D60A992314CE37030061AD6D /* .bundle */;
+			productReference = D60A992314CE37030061AD6D /* TotalFinder.osax */;
 			productType = "com.apple.product-type.bundle";
 		};
 /* End PBXNativeTarget section */
