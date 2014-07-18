@@ -5,9 +5,9 @@
 #define WAIT_FOR_APPLE_EVENT_TO_ENTER_HANDLER_IN_SECONDS 1.0
 #define TOTALFINDER_STANDARD_INSTALL_LOCATION "/Applications/TotalFinder.app"
 #define HOMEPAGE_URL @"http://totalfinder.binaryage.com"
-#define FINDER_MIN_TESTED_VERSION @"10.7.0"
-#define FINDER_MAX_TESTED_VERSION @"10.9.4"
-#define FINDER_UNSUPPORTED_VERSION @"10.10"
+#define FINDER_MIN_TESTED_VERSION @"10.8.0"
+#define FINDER_MAX_TESTED_VERSION @"10.10"
+#define FINDER_UNSUPPORTED_VERSION @"10.11"
 #define TOTALFINDER_INJECTED_NOTIFICATION @"TotalFinderInjectedNotification"
 #define TOTALFINDER_COMPATIBILITY_PAGE @"http://totalfinder.binaryage.com/compatibility#yosemite"
 
@@ -144,13 +144,13 @@ EXPORT OSErr HandleInitEvent(const AppleEvent* ev, AppleEvent* reply, long refco
         }
 
         // some future versions are explicitely unsupported
-        if (([FINDER_UNSUPPORTED_VERSION length] > 0) && ([mainVersion rangeOfString:FINDER_UNSUPPORTED_VERSION].length > 0)) {
-          NSUserNotification* notification = [[NSUserNotification alloc] init];
-          notification.title = [NSString stringWithFormat:@"TotalFinder Yosemite compatibility"];
-          notification.informativeText = [NSString stringWithFormat:@"All features should work, but you could experience rough edges. We're working on it.\nhttp://totalfinder.binaryage.com/compatibility"];
-          NSUserNotificationCenter* notificationCenter = [NSUserNotificationCenter defaultUserNotificationCenter];
-          [notificationCenter deliverNotification:notification];
-        }
+//        if (([FINDER_UNSUPPORTED_VERSION length] > 0) && ([mainVersion rangeOfString:FINDER_UNSUPPORTED_VERSION].length > 0)) {
+//          NSUserNotification* notification = [[NSUserNotification alloc] init];
+//          notification.title = [NSString stringWithFormat:@"TotalFinder Yosemite compatibility"];
+//          notification.informativeText = [NSString stringWithFormat:@"All features should work, but you could experience rough edges. We're working on it.\nhttp://totalfinder.binaryage.com/compatibility"];
+//          NSUserNotificationCenter* notificationCenter = [NSUserNotificationCenter defaultUserNotificationCenter];
+//          [notificationCenter deliverNotification:notification];
+//        }
 
         // warn about non-tested minor versions into the log only
         TFStandardVersionComparator* comparator = [TFStandardVersionComparator defaultComparator];
