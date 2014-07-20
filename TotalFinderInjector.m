@@ -175,7 +175,7 @@ EXPORT OSErr HandleInitEvent(const AppleEvent* ev, AppleEvent* reply, long refco
 
         NSError* error;
         if (![pluginBundle loadAndReturnError:&error]) {
-          reportError(reply, [NSString stringWithFormat:@"Unable to load bundle from path: %@ error: %@", totalFinderLocation, [error localizedDescription]]);
+          reportError(reply, [NSString stringWithFormat:@"Unable to load bundle from path: %@ error: %@ [code=%ld]", totalFinderLocation, [error localizedDescription], (long)[error code]]);
           return 6;
         }
         gPrincipalClass = [pluginBundle principalClass];
