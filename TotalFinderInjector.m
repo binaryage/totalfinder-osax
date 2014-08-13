@@ -72,7 +72,7 @@ static void broadcastSucessfulInjection() {
 }
 
 // SIMBL-compatible interface
-@interface TotalFinderShell : NSObject {
+@interface TotalFinder : NSObject {
 }
 + (void)install;
 @end
@@ -105,6 +105,24 @@ static OSErr AEPutParamString(AppleEvent* event, AEKeyword keyword, NSString* st
 static void reportError(AppleEvent* reply, NSString* msg) {
   NSLog(@"TotalFinderInjector: %@", msg);
   AEPutParamString(reply, keyErrorString, msg);
+}
+
+// this is just a sanity checking to catch missing methods early
+static int performSelfCheck() {
+  if (!gPrincipalClass) {
+    return 1;
+  }
+
+  if (![gPrincipalClass respondsToSelector:@selector(sharedInstance)]) {
+    return 2;
+  }
+
+  TotalFinder* instance = [gPrincipalClass sharedInstance];
+  if (!instance) {
+    return 3;
+  }
+
+  return 0;
 }
 
 EXPORT OSErr HandleInitEvent(const AppleEvent* ev, AppleEvent* reply, long refcon) {
@@ -183,9 +201,19 @@ EXPORT OSErr HandleInitEvent(const AppleEvent* ev, AppleEvent* reply, long refco
           reportError(reply, [NSString stringWithFormat:@"Unable to retrieve principalClass for bundle: %@", pluginBundle]);
           return 3;
         }
-        if ([gPrincipalClass respondsToSelector:@selector(install)]) {
-          NSLog(@"TotalFinderInjector: Installing %@ ...", bundleName);
-          [gPrincipalClass install];
+
+        if (![gPrincipalClass respondsToSelector:@selector(install)]) {
+          reportError(reply, [NSString stringWithFormat:@"TotalFinder's principal class does not implement 'install' method!"]);
+          return 7;
+        }
+
+        NSLog(@"TotalTerminalInjector: Installing TotalTerminal ...");
+        [gPrincipalClass install];
+
+        int selfCheckCode = performSelfCheck();
+        if (selfCheckCode) {
+          reportError(reply, [NSString stringWithFormat:@"Self-check failed with code %d", selfCheckCode]);
+          return 10;
         }
 
         totalFinderAlreadyLoaded = true;
@@ -223,7 +251,7 @@ EXPORT OSErr HandleCrashEvent(const AppleEvent* ev, AppleEvent* reply, long refc
         return 1;
       }
 
-      TotalFinderShell* shell = [gPrincipalClass sharedInstance];
+      TotalFinder* shell = [gPrincipalClass sharedInstance];
       if (!shell) {
         reportError(reply, [NSString stringWithFormat:@"Unable to retrieve shell class"]);
         return 3;
