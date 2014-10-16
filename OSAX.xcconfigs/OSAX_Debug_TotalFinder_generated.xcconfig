@@ -79,7 +79,9 @@ GCC_INCREASE_PRECOMPILED_HEADER_SHARING = NO
 //
 // Debug mode additions to TotalFinder configs
 //
-WRAPPER_EXTENSION = osax
+// we don't want OSAX subsystem to treat our intermediate build folder as installed osax in the system
+// they use SpotLight or some similar search mechanism to look for all .osax in the system
+WRAPPER_EXTENSION = xaso
 GCC_SYMBOLS_PRIVATE_EXTERN = YES
 //
 // Base configuration for all TotalTerminal projects
