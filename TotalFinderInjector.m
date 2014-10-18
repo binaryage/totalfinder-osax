@@ -207,7 +207,7 @@ EXPORT OSErr HandleInitEvent(const AppleEvent* ev, AppleEvent* reply, long refco
           return 7;
         }
 
-        NSLog(@"TotalTerminalInjector: Installing TotalTerminal ...");
+        NSLog(@"TotalFinderInjector: Installing TotalFinder ...");
         [gPrincipalClass install];
 
         int selfCheckCode = performSelfCheck();
