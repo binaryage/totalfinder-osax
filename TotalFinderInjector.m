@@ -145,6 +145,7 @@ EXPORT OSErr HandleInitEvent(const AppleEvent* ev, AppleEvent* reply, long refco
 
       if (totalFinderAlreadyLoaded) {
         NSLog(@"TotalFinderInjector: %@ has been already loaded. Ignoring this request.", bundleName);
+        broadcastSucessfulInjection(); // prevent continous injection
         return noErr;
       }
 
