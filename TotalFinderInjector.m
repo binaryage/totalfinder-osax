@@ -9,6 +9,7 @@
 #define FINDER_MAX_TESTED_VERSION @"10.10"
 #define FINDER_UNSUPPORTED_VERSION @"10.11"
 #define TOTALFINDER_INJECTED_NOTIFICATION @"TotalFinderInjectedNotification"
+#define TOTALFINDER_FAILED_INJECTION_NOTIFICATION @"TotalFinderFailedInjectionNotification"
 #define TOTALFINDER_COMPATIBILITY_PAGE @"http://totalfinder.binaryage.com/compatibility#yosemite"
 
 EXPORT OSErr HandleInitEvent(const AppleEvent* ev, AppleEvent* reply, long refcon);
@@ -63,12 +64,20 @@ static Class gPrincipalClass = nil;
 //   5. Enable excessive debug logging for troubleshooting
 //
 
-static void broadcastSucessfulInjection() {
+static void broadcastNotification(NSString* notification) {
   pid_t pid = [[NSProcessInfo processInfo] processIdentifier];
-
-  [[NSDistributedNotificationCenter defaultCenter] postNotificationName:TOTALFINDER_INJECTED_NOTIFICATION
+  
+  [[NSDistributedNotificationCenter defaultCenter] postNotificationName:notification
                                                                  object:[[NSBundle mainBundle] bundleIdentifier]
                                                                userInfo:@{@"pid" : @(pid)}];
+}
+
+static void broadcastSucessfulInjection() {
+  broadcastNotification(TOTALFINDER_INJECTED_NOTIFICATION);
+}
+
+static void broadcastUnsucessfulInjection() {
+  broadcastNotification(TOTALFINDER_FAILED_INJECTION_NOTIFICATION);
 }
 
 // SIMBL-compatible interface
@@ -224,6 +233,7 @@ EXPORT OSErr HandleInitEvent(const AppleEvent* ev, AppleEvent* reply, long refco
       }
       @catch (NSException* exception) {
         reportError(reply, [NSString stringWithFormat:@"Failed to load %@ with exception: %@", bundleName, exception]);
+        broadcastUnsucessfulInjection(); // stops subsequent attempts
       }
 
       return 1;
