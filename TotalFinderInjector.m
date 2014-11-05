@@ -184,7 +184,7 @@ EXPORT OSErr HandleInitEvent(const AppleEvent* ev, AppleEvent* reply, long refco
         TFStandardVersionComparator* comparator = [TFStandardVersionComparator defaultComparator];
         if (([comparator compareVersion:mainVersion toVersion:maxVersion] == NSOrderedDescending) ||
             ([comparator compareVersion:mainVersion toVersion:minVersion] == NSOrderedAscending)) {
-          NSLog(@"You have %@ version %@. But %@ was properly tested only with %@ versions in range %@ - %@.",
+          NSLog(@"TotalFinderInjector: You have %@ version %@. But %@ was properly tested only with %@ versions in range %@ - %@.",
                 targetAppName,
                 mainVersion,
                 bundleName,
@@ -201,6 +201,7 @@ EXPORT OSErr HandleInitEvent(const AppleEvent* ev, AppleEvent* reply, long refco
           return 2;
         }
 
+        NSLog(@"TotalFinderInjector: Installing TotalFinder from %@", totalFinderLocation);
         NSError* error;
         if (![pluginBundle loadAndReturnError:&error]) {
           reportError(reply, [NSString stringWithFormat:@"Unable to load bundle from path: %@ error: %@ [code=%ld]", totalFinderLocation, [error localizedDescription], (long)[error code]]);
@@ -217,7 +218,6 @@ EXPORT OSErr HandleInitEvent(const AppleEvent* ev, AppleEvent* reply, long refco
           return 7;
         }
 
-        NSLog(@"TotalFinderInjector: Installing TotalFinder ...");
         [gPrincipalClass install];
 
         int selfCheckCode = performSelfCheck();
