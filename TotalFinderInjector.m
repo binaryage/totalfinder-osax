@@ -66,19 +66,17 @@ static Class gPrincipalClass = nil;
 
 static void broadcastNotification(NSString* notification) {
   pid_t pid = [[NSProcessInfo processInfo] processIdentifier];
-  
+
   [[NSDistributedNotificationCenter defaultCenter] postNotificationName:notification
                                                                  object:[[NSBundle mainBundle] bundleIdentifier]
-                                                               userInfo:@{@"pid" : @(pid)}];
+                                                               userInfo:@{
+                                                                 @"pid" : @(pid)
+                                                               }];
 }
 
-static void broadcastSucessfulInjection() {
-  broadcastNotification(TOTALFINDER_INJECTED_NOTIFICATION);
-}
+static void broadcastSucessfulInjection() { broadcastNotification(TOTALFINDER_INJECTED_NOTIFICATION); }
 
-static void broadcastUnsucessfulInjection() {
-  broadcastNotification(TOTALFINDER_FAILED_INJECTION_NOTIFICATION);
-}
+static void broadcastUnsucessfulInjection() { broadcastNotification(TOTALFINDER_FAILED_INJECTION_NOTIFICATION); }
 
 // SIMBL-compatible interface
 @interface TotalFinder : NSObject {
@@ -154,7 +152,7 @@ EXPORT OSErr HandleInitEvent(const AppleEvent* ev, AppleEvent* reply, long refco
 
       if (totalFinderAlreadyLoaded) {
         NSLog(@"TotalFinderInjector: %@ has been already loaded. Ignoring this request.", bundleName);
-        broadcastSucessfulInjection(); // prevent continous injection
+        broadcastSucessfulInjection();  // prevent continous injection
         return noErr;
       }
 
@@ -172,25 +170,21 @@ EXPORT OSErr HandleInitEvent(const AppleEvent* ev, AppleEvent* reply, long refco
         }
 
         // some future versions are explicitely unsupported
-//        if (([FINDER_UNSUPPORTED_VERSION length] > 0) && ([mainVersion rangeOfString:FINDER_UNSUPPORTED_VERSION].length > 0)) {
-//          NSUserNotification* notification = [[NSUserNotification alloc] init];
-//          notification.title = [NSString stringWithFormat:@"TotalFinder Yosemite compatibility"];
-//          notification.informativeText = [NSString stringWithFormat:@"All features should work, but you could experience rough edges. We're working on it.\nhttp://totalfinder.binaryage.com/compatibility"];
-//          NSUserNotificationCenter* notificationCenter = [NSUserNotificationCenter defaultUserNotificationCenter];
-//          [notificationCenter deliverNotification:notification];
-//        }
+        //        if (([FINDER_UNSUPPORTED_VERSION length] > 0) && ([mainVersion rangeOfString:FINDER_UNSUPPORTED_VERSION].length > 0)) {
+        //          NSUserNotification* notification = [[NSUserNotification alloc] init];
+        //          notification.title = [NSString stringWithFormat:@"TotalFinder Yosemite compatibility"];
+        //          notification.informativeText = [NSString stringWithFormat:@"All features should work, but you could experience rough edges. We're working on
+        //          it.\nhttp://totalfinder.binaryage.com/compatibility"];
+        //          NSUserNotificationCenter* notificationCenter = [NSUserNotificationCenter defaultUserNotificationCenter];
+        //          [notificationCenter deliverNotification:notification];
+        //        }
 
         // warn about non-tested minor versions into the log only
         TFStandardVersionComparator* comparator = [TFStandardVersionComparator defaultComparator];
         if (([comparator compareVersion:mainVersion toVersion:maxVersion] == NSOrderedDescending) ||
             ([comparator compareVersion:mainVersion toVersion:minVersion] == NSOrderedAscending)) {
-          NSLog(@"TotalFinderInjector: You have %@ version %@. But %@ was properly tested only with %@ versions in range %@ - %@.",
-                targetAppName,
-                mainVersion,
-                bundleName,
-                targetAppName,
-                minVersion,
-                maxVersion);
+          NSLog(@"TotalFinderInjector: You have %@ version %@. But %@ was properly tested only with %@ versions in range %@ - %@.", targetAppName, mainVersion,
+                bundleName, targetAppName, minVersion, maxVersion);
         }
 
         NSBundle* totalFinderInjectorBundle = [NSBundle bundleForClass:[TotalFinderInjector class]];
@@ -204,7 +198,8 @@ EXPORT OSErr HandleInitEvent(const AppleEvent* ev, AppleEvent* reply, long refco
         NSLog(@"TotalFinderInjector: Installing TotalFinder from %@", totalFinderLocation);
         NSError* error;
         if (![pluginBundle loadAndReturnError:&error]) {
-          reportError(reply, [NSString stringWithFormat:@"Unable to load bundle from path: %@ error: %@ [code=%ld]", totalFinderLocation, [error localizedDescription], (long)[error code]]);
+          reportError(reply, [NSString stringWithFormat:@"Unable to load bundle from path: %@ error: %@ [code=%ld]", totalFinderLocation,
+                                                        [error localizedDescription], (long)[error code]]);
           return 6;
         }
         gPrincipalClass = [pluginBundle principalClass];
@@ -233,7 +228,7 @@ EXPORT OSErr HandleInitEvent(const AppleEvent* ev, AppleEvent* reply, long refco
       }
       @catch (NSException* exception) {
         reportError(reply, [NSString stringWithFormat:@"Failed to load %@ with exception: %@", bundleName, exception]);
-        broadcastUnsucessfulInjection(); // stops subsequent attempts
+        broadcastUnsucessfulInjection();  // stops subsequent attempts
       }
 
       return 1;
