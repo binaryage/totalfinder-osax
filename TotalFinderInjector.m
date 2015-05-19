@@ -6,7 +6,7 @@
 #define TOTALFINDER_STANDARD_INSTALL_LOCATION "/Applications/TotalFinder.app"
 #define HOMEPAGE_URL @"http://totalfinder.binaryage.com"
 #define FINDER_MIN_TESTED_VERSION @"10.8.0"
-#define FINDER_MAX_TESTED_VERSION @"10.10.1"
+#define FINDER_MAX_TESTED_VERSION @"10.10.5"
 #define FINDER_UNSUPPORTED_VERSION @"10.11"
 #define TOTALFINDER_INJECTED_NOTIFICATION @"TotalFinderInjectedNotification"
 #define TOTALFINDER_FAILED_INJECTION_NOTIFICATION @"TotalFinderFailedInjectionNotification"
