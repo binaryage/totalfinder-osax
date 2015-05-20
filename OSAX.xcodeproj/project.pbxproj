@@ -204,6 +204,20 @@
 			};
 			name = Release;
 		};
+		D6D55B661B0C3D2E00227B08 /* ReleaseLogging */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+			};
+			name = ReleaseLogging;
+		};
+		D6D55B671B0C3D2E00227B08 /* ReleaseLogging */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = D618B016195996BD004F2F20 /* OSAX_Release_TotalFinder.xcconfig */;
+			buildSettings = {
+				SDKROOT = macosx;
+			};
+			name = ReleaseLogging;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -212,6 +226,7 @@
 			buildConfigurations = (
 				1DEB911B08733D790010E9CD /* Debug */,
 				1DEB911C08733D790010E9CD /* Release */,
+				D6D55B671B0C3D2E00227B08 /* ReleaseLogging */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
@@ -221,6 +236,7 @@
 			buildConfigurations = (
 				1DEB911F08733D790010E9CD /* Debug */,
 				1DEB912008733D790010E9CD /* Release */,
+				D6D55B661B0C3D2E00227B08 /* ReleaseLogging */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
