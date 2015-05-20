@@ -11,6 +11,7 @@
 		D6ACBEA2117B7D5600F6691C /* TotalFinderInjector.m in Sources */ = {isa = PBXBuildFile; fileRef = D6ACBE9E117B7D5600F6691C /* TotalFinderInjector.m */; };
 		D6ACBEA3117B7D5600F6691C /* TFStandardVersionComparator.m in Sources */ = {isa = PBXBuildFile; fileRef = D6ACBEA0117B7D5600F6691C /* TFStandardVersionComparator.m */; };
 		D6ACBEA5117B7D6100F6691C /* TotalFinderInjector.sdef in Resources */ = {isa = PBXBuildFile; fileRef = D6ACBEA4117B7D6100F6691C /* TotalFinderInjector.sdef */; };
+		D6D55BAB1B0C4D1700227B08 /* OSAX_ReleaseLogging_TotalFinder.xcconfig in Resources */ = {isa = PBXBuildFile; fileRef = D6D55BAA1B0C4D1700227B08 /* OSAX_ReleaseLogging_TotalFinder.xcconfig */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -25,6 +26,7 @@
 		D6ACBEA0117B7D5600F6691C /* TFStandardVersionComparator.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TFStandardVersionComparator.m; sourceTree = "<group>"; };
 		D6ACBEA1117B7D5600F6691C /* TFStandardVersionComparator.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TFStandardVersionComparator.h; sourceTree = "<group>"; };
 		D6ACBEA4117B7D6100F6691C /* TotalFinderInjector.sdef */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; path = TotalFinderInjector.sdef; sourceTree = "<group>"; };
+		D6D55BAA1B0C4D1700227B08 /* OSAX_ReleaseLogging_TotalFinder.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; name = OSAX_ReleaseLogging_TotalFinder.xcconfig; path = OSAX.xcconfigs/OSAX_ReleaseLogging_TotalFinder.xcconfig; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -85,6 +87,7 @@
 		D672258517FA6D3900D3ACEA /* Configs */ = {
 			isa = PBXGroup;
 			children = (
+				D6D55BAA1B0C4D1700227B08 /* OSAX_ReleaseLogging_TotalFinder.xcconfig */,
 				D618B015195996BD004F2F20 /* OSAX_Debug_TotalFinder.xcconfig */,
 				D618B016195996BD004F2F20 /* OSAX_Release_TotalFinder.xcconfig */,
 			);
@@ -146,6 +149,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				8D5B49A804867FD3000E48DA /* InfoPlist.strings in Resources */,
+				D6D55BAB1B0C4D1700227B08 /* OSAX_ReleaseLogging_TotalFinder.xcconfig in Resources */,
 				D6ACBEA5117B7D6100F6691C /* TotalFinderInjector.sdef in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -212,7 +216,7 @@
 		};
 		D6D55B671B0C3D2E00227B08 /* ReleaseLogging */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = D618B016195996BD004F2F20 /* OSAX_Release_TotalFinder.xcconfig */;
+			baseConfigurationReference = D6D55BAA1B0C4D1700227B08 /* OSAX_ReleaseLogging_TotalFinder.xcconfig */;
 			buildSettings = {
 				SDKROOT = macosx;
 			};
