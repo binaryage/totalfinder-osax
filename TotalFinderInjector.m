@@ -69,9 +69,8 @@ static void broadcastNotification(NSString* notification) {
 
   [[NSDistributedNotificationCenter defaultCenter] postNotificationName:notification
                                                                  object:[[NSBundle mainBundle] bundleIdentifier]
-                                                               userInfo:@{
-                                                                 @"pid" : @(pid)
-                                                               }];
+                                                               userInfo:@{@"pid" : @(pid)}
+                                                     deliverImmediately:YES];
 }
 
 static void broadcastSucessfulInjection() { broadcastNotification(TOTALFINDER_INJECTED_NOTIFICATION); }
