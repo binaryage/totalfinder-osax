@@ -12,8 +12,6 @@
 #define TOTALFINDER_FAILED_INJECTION_NOTIFICATION @"TotalFinderFailedInjectionNotification"
 #define TOTALFINDER_COMPATIBILITY_PAGE @"http://totalfinder.binaryage.com/compatibility#yosemite"
 
-EXPORT OSErr HandleInitEvent(const AppleEvent* ev, AppleEvent* reply, long refcon);
-
 static NSString* globalLock = @"I'm the global lock to prevent concruent handler executions";
 static bool totalFinderAlreadyLoaded = false;
 static Class gPrincipalClass = nil;
