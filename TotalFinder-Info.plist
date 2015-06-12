@@ -7,7 +7,7 @@
 	<key>CFBundleExecutable</key>
 	<string>${EXECUTABLE_NAME}</string>
 	<key>CFBundleIdentifier</key>
-	<string>com.binaryage.totalfinder.injector</string>
+	<string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundleName</key>
@@ -26,32 +26,32 @@
 	<dict>
 		<key>Events</key>
 		<dict>
-			<key>BATFinit</key>
-			<dict>
-				<key>Handler</key>
-				<string>HandleInitEvent</string>
-				<key>ThreadSafe</key>
-				<false/>
-				<key>Context</key>
-				<string>Process</string>
-			</dict>
 			<key>BATFchck</key>
 			<dict>
+				<key>Context</key>
+				<string>Process</string>
 				<key>Handler</key>
 				<string>HandleCheckEvent</string>
 				<key>ThreadSafe</key>
 				<false/>
-				<key>Context</key>
-				<string>Process</string>
 			</dict>
 			<key>BATFcrsh</key>
 			<dict>
+				<key>Context</key>
+				<string>Process</string>
 				<key>Handler</key>
 				<string>HandleCrashEvent</string>
 				<key>ThreadSafe</key>
 				<false/>
+			</dict>
+			<key>BATFinit</key>
+			<dict>
 				<key>Context</key>
 				<string>Process</string>
+				<key>Handler</key>
+				<string>HandleInitEvent</string>
+				<key>ThreadSafe</key>
+				<false/>
 			</dict>
 		</dict>
 	</dict>
