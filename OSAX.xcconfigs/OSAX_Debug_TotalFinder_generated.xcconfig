@@ -73,7 +73,7 @@ GCC_WARN_ABOUT_RETURN_TYPE = YES
 COMBINE_HIDPI_IMAGES = YES
 DEBUG_INFORMATION_FORMAT = dwarf-with-dsym
 INFOPLIST_FILE = TotalFinder-Info.plist
-GCC_PRECOMPILE_PREFIX_HEADER = YES
+GCC_PRECOMPILE_PREFIX_HEADER = NO
 GCC_PREFIX_HEADER = TotalFinder-Prefix.pch
 GCC_INCREASE_PRECOMPILED_HEADER_SHARING = NO
 //
@@ -108,7 +108,7 @@ GCC_INCREASE_PRECOMPILED_HEADER_SHARING = NO
 //
 // Dynamic configuration collected from all sections above
 //
-WARNING_CFLAGS = -Wextra -Wself-assign -Wno-gcc-compat -Wno-unused-parameter -Wstrict-prototypes -Wunreachable-code -Wunused-member-function -Wuninitialized -Wsuper-class-method-mismatch -Warc-abi -Warc-retain-cycles -Warc-unsafe-retained-assign -Warc-non-pod-memaccess -Wbind-to-temporary-copy -Wthread-safety -Wthread-safety-beta -Wthread-safety -Wthread-safety-beta
+WARNING_CFLAGS = -Wextra -Wself-assign -Wno-gcc-compat -Wno-unused-parameter -Wstrict-prototypes -Wunreachable-code -Wunused-member-function -Wuninitialized -Wsuper-class-method-mismatch -Warc -Warc-retain-cycles -Warc-unsafe-retained-assign -Warc-non-pod-memaccess -Wbind-to-temporary-copy -Wthread-safety -Wthread-safety-beta -Wthread-safety -Wthread-safety-beta
 GCC_PREPROCESSOR_DEFINITIONS = DEBUG=1 LOGGING_SUPPORT=1
 OTHER_CPLUSPLUSFLAGS = -ftrapv -fsanitize=undefined-trap -fsanitize-undefined-trap-on-error
 OTHER_LDFLAGS = -undefined dynamic_lookup -headerpad_max_install_names -undefined dynamic_lookup -headerpad_max_install_names
