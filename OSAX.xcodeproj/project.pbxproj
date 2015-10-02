@@ -14,7 +14,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		089C167EFE841241C02AAC07 /* English */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.strings; name = English; path = English.lproj/InfoPlist.strings; sourceTree = "<group>"; };
+		089C167EFE841241C02AAC07 /* English */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.strings; name = English; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		8D576317048677EA00EA77CD /* TotalFinder-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "TotalFinder-Info.plist"; sourceTree = "<group>"; };
 		D60A992314CE37030061AD6D /* TotalFinder.xaso */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = TotalFinder.xaso; sourceTree = BUILT_PRODUCTS_DIR; };
 		D618B015195996BD004F2F20 /* OSAX_Debug_TotalFinder.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; name = OSAX_Debug_TotalFinder.xcconfig; path = OSAX.xcconfigs/OSAX_Debug_TotalFinder.xcconfig; sourceTree = "<group>"; };
