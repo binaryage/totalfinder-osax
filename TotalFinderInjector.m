@@ -2,15 +2,14 @@
 
 #define EXPORT __attribute__((visibility("default")))
 
-#define WAIT_FOR_APPLE_EVENT_TO_ENTER_HANDLER_IN_SECONDS 1.0
-#define TOTALFINDER_STANDARD_INSTALL_LOCATION "/Applications/TotalFinder.app"
-#define HOMEPAGE_URL @"http://totalfinder.binaryage.com"
-#define FINDER_MIN_TESTED_VERSION @"10.8.0"
-#define FINDER_MAX_TESTED_VERSION @"10.11.4"
-#define FINDER_UNSUPPORTED_VERSION @"10.12"
+#define TOTALFINDER_INSTALL_LOCATION_CONFIG_PATH "~/.totalfinder-install-location"
+#define TOTALFINDER_STANDARD_BUNDLE_LOCATION "/Applications/TotalFinder.app/Contents/Resources/TotalFinder.bundle"
+#define TOTALFINDER_DEV_BUNDLE_LOCATION "~/Applications/TotalFinder.app/Contents/Resources/TotalFinder.bundle"
+#define TOTALFINDER_OSAX_BUNDLE_LOCATION "/Library/ScriptingAdditions/TotalFinder.osax/Contents/Resources/TotalFinder.bundle"
+#define TOTALFINDER_SYSTEM_OSAX_BUNDLE_LOCATION "/System/Library/ScriptingAdditions/TotalFinder.osax/Contents/Resources/TotalFinder.bundle"
+#define TOTALFINDER_USER_OSAX_BUNDLE_LOCATION "~/Library/ScriptingAdditions/TotalFinder.osax/Contents/Resources/TotalFinder.bundle"
 #define TOTALFINDER_INJECTED_NOTIFICATION @"TotalFinderInjectedNotification"
 #define TOTALFINDER_FAILED_INJECTION_NOTIFICATION @"TotalFinderFailedInjectionNotification"
-#define TOTALFINDER_COMPATIBILITY_PAGE @"http://totalfinder.binaryage.com/compatibility#yosemite"
 
 static NSString* globalLock = @"I'm the global lock to prevent concruent handler executions";
 static bool totalFinderAlreadyLoaded = false;
@@ -129,31 +128,131 @@ static int performSelfCheck() {
   return 0;
 }
 
+static bool checkExistenceOfTotalFinderBundleAtPath(NSString* path) {
+  NSFileManager* fileManager = [NSFileManager defaultManager];
+  BOOL dir = FALSE;
+  if ([fileManager fileExistsAtPath:path isDirectory:&dir]) {
+    if (!dir) {
+      NSLog(@"TotalFinderInjector: unexpected situation, filesystem path exists but it is not a directory: %@", path);
+      return false;
+    }
+    if (![fileManager isReadableFileAtPath:path]) {
+      NSLog(@"TotalFinderInjector: unexpected situation, filesystem path exists but it is not readable: %@", path);
+      return false;
+    }
+    return true;
+  }
+  return false;
+}
+
+static NSString* determineTotalFinderBundlePath() {
+  // config file can override standard installation location
+  NSFileManager* fileManager = [NSFileManager defaultManager];
+  NSString* installLocationConfigPath = [@TOTALFINDER_INSTALL_LOCATION_CONFIG_PATH stringByStandardizingPath];
+  if ([fileManager fileExistsAtPath:installLocationConfigPath]) {
+    NSData* configData = [fileManager contentsAtPath:installLocationConfigPath];
+    if (configData) {
+      NSString* content = [[NSString alloc] initWithData:configData encoding:NSUTF8StringEncoding];
+      if (content && [content length]) {
+        if (checkExistenceOfTotalFinderBundleAtPath(content)) {
+          return content;
+        } else {
+          NSLog(@"TotalFinderInjector: install location specified path which does not point to existing TotalFinder.bundle\nconfig file:%@\nspecified bundle path:%@", installLocationConfigPath, content);
+        }
+      } else {
+        NSLog(@"TotalFinderInjector: unable to read content of %@", installLocationConfigPath);
+      }
+    } else {
+      NSLog(@"TotalFinderInjector: unable to read installation location from %@", installLocationConfigPath);
+    }
+  }
+  
+  NSString* path;
+  
+  // this location is standard since TotalFinder 1.7.13, TotalFinder.bundle is located in TotalFinder.app's resources
+  path = [@TOTALFINDER_STANDARD_BUNDLE_LOCATION stringByStandardizingPath];
+  if (checkExistenceOfTotalFinderBundleAtPath(path)) {
+    return path;
+  }
+
+  // prior TotalFinder 1.7.13, budle was included in the OSAX
+  path = [@TOTALFINDER_OSAX_BUNDLE_LOCATION stringByStandardizingPath];
+  if (checkExistenceOfTotalFinderBundleAtPath(path)) {
+    return path;
+  }
+
+  // this is a special case if someone decided to move TotalFinder.bundle under system osax location for some reason
+  path = [@TOTALFINDER_SYSTEM_OSAX_BUNDLE_LOCATION stringByStandardizingPath];
+  if (checkExistenceOfTotalFinderBundleAtPath(path)) {
+    return path;
+  }
+
+  // this is a special case if someone decided to move TotalFinder.bundle under user osax location for some reason (we use this during development)
+  path = [@TOTALFINDER_USER_OSAX_BUNDLE_LOCATION stringByStandardizingPath];
+  if (checkExistenceOfTotalFinderBundleAtPath(path)) {
+    return path;
+  }
+
+  // this is used during development
+  path = [@TOTALFINDER_DEV_BUNDLE_LOCATION stringByStandardizingPath];
+  if (checkExistenceOfTotalFinderBundleAtPath(path)) {
+    return path;
+  }
+
+  return nil;
+}
+
 EXPORT OSErr HandleInitEvent(const AppleEvent* ev, AppleEvent* reply, long refcon) {
   @synchronized(globalLock) {
     @autoreleasepool {
+      NSString* targetAppName = @"Finder";
+      NSString* bundleName = @"TotalFinder";
+      TFStandardVersionComparator* comparator = [TFStandardVersionComparator defaultComparator];
       NSBundle* injectorBundle = [NSBundle bundleForClass:[TotalFinderInjector class]];
       NSString* injectorVersion = [injectorBundle objectForInfoDictionaryKey:@"CFBundleVersion"];
 
       if (!injectorVersion || ![injectorVersion isKindOfClass:[NSString class]]) {
         reportError(reply, [NSString stringWithFormat:@"Unable to determine TotalFinderInjector version!"]);
-        return 7;
+        return 11;
       }
-
-      NSLog(@"TotalFinderInjector v%@ received init event", injectorVersion);
-
-      NSString* bundleName = @"TotalFinder";
-      NSString* targetAppName = @"Finder";
-      NSString* maxVersion = FINDER_MAX_TESTED_VERSION;
-      NSString* minVersion = FINDER_MIN_TESTED_VERSION;
-
+      
+      NSString* injectorBundlePath = [injectorBundle bundlePath];
+      NSLog(@"TotalFinderInjector v%@ received init event (%@)", injectorVersion, injectorBundlePath);
+      
       if (totalFinderAlreadyLoaded) {
         NSLog(@"TotalFinderInjector: %@ has been already loaded. Ignoring this request.", bundleName);
         broadcastSucessfulInjection();  // prevent continous injection
         return noErr;
       }
+      
+      NSString* totalFinderBundlePath = determineTotalFinderBundlePath();
+      if (!totalFinderBundlePath) {
+        NSLog(@"TotalFinderInjector: unable to determine location of TotalFinder.bundle (likely a corrupted TotalFinder installation).");
+        return 12;
+      }
 
       @try {
+        NSBundle* totalFinderBundle = [NSBundle bundleWithPath:totalFinderBundlePath];
+        if (!totalFinderBundle) {
+          reportError(reply, [NSString stringWithFormat:@"Unable to create bundle from path: %@", totalFinderBundlePath]);
+          return 2;
+        }
+        
+        NSString* maxTestedVersion = [totalFinderBundle objectForInfoDictionaryKey:@"FinderMaxTestedVersion"];
+        if (!maxTestedVersion || ![maxTestedVersion isKindOfClass:[NSString class]]) {
+          maxTestedVersion = nil;
+        }
+        
+        NSString* minTestedVersion = [totalFinderBundle objectForInfoDictionaryKey:@"FinderMinTestedVersion"];
+        if (!minTestedVersion || ![minTestedVersion isKindOfClass:[NSString class]]) {
+          minTestedVersion = nil;
+        }
+
+        NSString* unsupportedVersion = [totalFinderBundle objectForInfoDictionaryKey:@"FinderUnsupportedVersion"];
+        if (!unsupportedVersion || ![unsupportedVersion isKindOfClass:[NSString class]]) {
+          unsupportedVersion = nil;
+        }
+
         NSBundle* mainBundle = [NSBundle mainBundle];
         if (!mainBundle) {
           reportError(reply, [NSString stringWithFormat:@"Unable to locate main %@ bundle!", targetAppName]);
@@ -166,42 +265,36 @@ EXPORT OSErr HandleInitEvent(const AppleEvent* ev, AppleEvent* reply, long refco
           return 5;
         }
 
-        // some future versions are explicitely unsupported
-        //        if (([FINDER_UNSUPPORTED_VERSION length] > 0) && ([mainVersion rangeOfString:FINDER_UNSUPPORTED_VERSION].length > 0)) {
-        //          NSUserNotification* notification = [[NSUserNotification alloc] init];
-        //          notification.title = [NSString stringWithFormat:@"TotalFinder Yosemite compatibility"];
-        //          notification.informativeText = [NSString stringWithFormat:@"All features should work, but you could experience rough edges. We're working on
-        //          it.\nhttp://totalfinder.binaryage.com/compatibility"];
-        //          NSUserNotificationCenter* notificationCenter = [NSUserNotificationCenter defaultUserNotificationCenter];
-        //          [notificationCenter deliverNotification:notification];
-        //        }
-
+        // future versions from some point can be explicitely unsupported
+        if (unsupportedVersion) {
+          NSComparisonResult comparatorResult = [comparator compareVersion:mainVersion toVersion:unsupportedVersion];
+          if (comparatorResult == NSOrderedDescending || comparatorResult == NSOrderedSame) {
+            NSLog(@"TotalFinderInjector: You have %@ version %@. But %@ was marked as unsupported with %@ since version %@.",
+                  targetAppName, mainVersion, bundleName, targetAppName, unsupportedVersion);
+            
+            // TODO: maybe we want to use a system notification to inform the user here
+            return 13;
+          }
+        }
+        
         // warn about non-tested minor versions into the log only
-        TFStandardVersionComparator* comparator = [TFStandardVersionComparator defaultComparator];
-        if (([comparator compareVersion:mainVersion toVersion:maxVersion] == NSOrderedDescending) ||
-            ([comparator compareVersion:mainVersion toVersion:minVersion] == NSOrderedAscending)) {
-          NSLog(@"TotalFinderInjector: You have %@ version %@. But %@ was properly tested only with %@ versions in range %@ - %@.", targetAppName, mainVersion,
-                bundleName, targetAppName, minVersion, maxVersion);
+        BOOL maxTestFailed = maxTestedVersion && [comparator compareVersion:mainVersion toVersion:maxTestedVersion] == NSOrderedDescending;
+        BOOL minTestFailed = minTestedVersion && [comparator compareVersion:mainVersion toVersion:minTestedVersion] == NSOrderedAscending;
+        if (maxTestFailed || minTestFailed) {
+          NSLog(@"TotalFinderInjector: You have %@ version %@. But %@ was properly tested only with %@ versions in range %@ - %@.",
+                targetAppName, mainVersion, bundleName, targetAppName, minTestedVersion?minTestedVersion:@"*", maxTestedVersion?maxTestedVersion:@"*");
         }
 
-        NSBundle* totalFinderInjectorBundle = [NSBundle bundleForClass:[TotalFinderInjector class]];
-        NSString* totalFinderLocation = [totalFinderInjectorBundle pathForResource:bundleName ofType:@"bundle"];
-        NSBundle* pluginBundle = [NSBundle bundleWithPath:totalFinderLocation];
-        if (!pluginBundle) {
-          reportError(reply, [NSString stringWithFormat:@"Unable to create bundle from path: %@ [%@]", totalFinderLocation, totalFinderInjectorBundle]);
-          return 2;
-        }
-
-        NSLog(@"TotalFinderInjector: Installing TotalFinder from %@", totalFinderLocation);
+        NSLog(@"TotalFinderInjector: Installing TotalFinder from %@", totalFinderBundlePath);
         NSError* error;
-        if (![pluginBundle loadAndReturnError:&error]) {
-          reportError(reply, [NSString stringWithFormat:@"Unable to load bundle from path: %@ error: %@ [code=%ld]", totalFinderLocation,
+        if (![totalFinderBundle loadAndReturnError:&error]) {
+          reportError(reply, [NSString stringWithFormat:@"Unable to load bundle from path: %@ error: %@ [code=%ld]", totalFinderBundlePath,
                                                         [error localizedDescription], (long)[error code]]);
           return 6;
         }
-        gPrincipalClass = [pluginBundle principalClass];
+        gPrincipalClass = [totalFinderBundle principalClass];
         if (!gPrincipalClass) {
-          reportError(reply, [NSString stringWithFormat:@"Unable to retrieve principalClass for bundle: %@", pluginBundle]);
+          reportError(reply, [NSString stringWithFormat:@"Unable to retrieve principalClass for bundle: %@", totalFinderBundle]);
           return 3;
         }
 
