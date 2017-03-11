@@ -169,6 +169,14 @@ static NSString* determineTotalFinderBundlePath() {
   
   NSString* path;
   
+#if defined(DEBUG)
+  // this is used during development
+  path = [@TOTALFINDER_DEV_BUNDLE_LOCATION stringByStandardizingPath];
+  if (checkExistenceOfTotalFinderBundleAtPath(path)) {
+    return path;
+  }
+#endif
+  
   // this location is standard since TotalFinder 1.7.13, TotalFinder.bundle is located in TotalFinder.app's resources
   path = [@TOTALFINDER_STANDARD_BUNDLE_LOCATION stringByStandardizingPath];
   if (checkExistenceOfTotalFinderBundleAtPath(path)) {
@@ -189,12 +197,6 @@ static NSString* determineTotalFinderBundlePath() {
 
   // this is a special case if someone decided to move TotalFinder.bundle under user osax location for some reason (we use this during development)
   path = [@TOTALFINDER_USER_OSAX_BUNDLE_LOCATION stringByStandardizingPath];
-  if (checkExistenceOfTotalFinderBundleAtPath(path)) {
-    return path;
-  }
-
-  // this is used during development
-  path = [@TOTALFINDER_DEV_BUNDLE_LOCATION stringByStandardizingPath];
   if (checkExistenceOfTotalFinderBundleAtPath(path)) {
     return path;
   }
