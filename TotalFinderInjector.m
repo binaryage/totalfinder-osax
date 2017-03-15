@@ -1,5 +1,9 @@
 #import "TFStandardVersionComparator.h"
 
+#if !defined(DEBUG)
+#define CHECK_SIGNATURE 1
+#endif
+
 #define EXPORT __attribute__((visibility("default")))
 
 #define TOTALFINDER_INSTALL_LOCATION_CONFIG_PATH "~/.totalfinder-install-location"
@@ -128,6 +132,53 @@ static int performSelfCheck() {
   return 0;
 }
 
+#if defined(CHECK_SIGNATURE)
+static NSString* checkSignature(CFURLRef bundleURL, CFStringRef requirementString, AppleEvent* reply) {
+  CFErrorRef error = NULL;
+  SecStaticCodeRef staticCode = NULL;
+  SecStaticCodeCreateWithPath(bundleURL, kSecCSDefaultFlags, &staticCode);
+  
+  if (!staticCode) {
+    return @"SecStaticCodeCreateWithPath returned no staticCode";
+  }
+  
+  SecRequirementRef requirementRef  = NULL;
+  OSStatus requirementCreateStatus = SecRequirementCreateWithStringAndErrors(requirementString, kSecCSDefaultFlags, &error, &requirementRef);
+  if (error) {
+    if (requirementRef) {
+      CFRelease(requirementRef);
+    }
+    NSString* result = [NSString stringWithFormat:@"SecRequirementCreateWithStringAndErrors reported %@", error];
+    CFRelease(error);
+    return result;
+  }
+  
+  if (requirementCreateStatus != errSecSuccess) {
+    if (requirementRef) {
+      CFRelease(requirementRef);
+    }
+    return [NSString stringWithFormat:@"SecRequirementCreateWithString returned error %d)", requirementCreateStatus];
+  }
+  
+  SecCSFlags flags = (SecCSFlags) (kSecCSDefaultFlags | kSecCSCheckAllArchitectures | kSecCSCheckNestedCode);
+  OSStatus signatureCheckResult = SecStaticCodeCheckValidityWithErrors(staticCode, flags, requirementRef, &error);
+  CFRelease(requirementRef);
+  CFRelease(staticCode);
+  
+  if (error) {
+    NSString* result = [NSString stringWithFormat:@"SecStaticCodeCheckValidityWithErrors reported %@", error];
+    CFRelease(error);
+    return result;
+  }
+  
+  if (signatureCheckResult != errSecSuccess) {
+    return [NSString stringWithFormat:@"SecStaticCodeCheckValidityWithErrors returned %d", signatureCheckResult];
+  }
+  
+  return nil;
+}
+#endif 
+
 static bool checkExistenceOfTotalFinderBundleAtPath(NSString* path) {
   NSFileManager* fileManager = [NSFileManager defaultManager];
   BOOL dir = FALSE;
@@ -234,6 +285,19 @@ EXPORT OSErr HandleInitEvent(const AppleEvent* ev, AppleEvent* reply, long refco
       }
 
       @try {
+        
+#if !defined(CHECK_SIGNATURE)
+        NSLog(@"TotalFinderInjector: skipped signature check because compiled without CHECK_SIGNATURE");
+#else
+        NSURL* totalFinderBundleURL = [NSURL fileURLWithPath:totalFinderBundlePath];
+        static CFStringRef injectorRequirement = CFSTR("anchor apple generic and identifier com.binaryage.totalfinder and certificate leaf[subject.CN] = \"Developer ID Application: BinaryAge Limited\"");
+        NSString* signatureError = checkSignature((__bridge CFURLRef)totalFinderBundleURL, injectorRequirement, reply);
+        if (signatureError) {
+          reportError(reply, [NSString stringWithFormat:@"Invalid code signature of '%@'.\n%@", totalFinderBundlePath, signatureError]);
+          return 14;
+        }
+#endif
+        
         NSBundle* totalFinderBundle = [NSBundle bundleWithPath:totalFinderBundlePath];
         if (!totalFinderBundle) {
           reportError(reply, [NSString stringWithFormat:@"Unable to create bundle from path: %@", totalFinderBundlePath]);
