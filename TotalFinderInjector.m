@@ -133,7 +133,7 @@ static int performSelfCheck() {
 }
 
 #if defined(CHECK_SIGNATURE)
-static NSString* checkSignature(CFURLRef bundleURL, CFStringRef requirementString, AppleEvent* reply) {
+static NSString* checkSignature(CFURLRef bundleURL, CFStringRef requirementString) {
   CFErrorRef error = NULL;
   SecStaticCodeRef staticCode = NULL;
   SecStaticCodeCreateWithPath(bundleURL, kSecCSDefaultFlags, &staticCode);
@@ -157,7 +157,7 @@ static NSString* checkSignature(CFURLRef bundleURL, CFStringRef requirementStrin
     if (requirementRef) {
       CFRelease(requirementRef);
     }
-    return [NSString stringWithFormat:@"SecRequirementCreateWithString returned error %d)", requirementCreateStatus];
+    return [NSString stringWithFormat:@"SecRequirementCreateWithString returned %d)", requirementCreateStatus];
   }
   
   SecCSFlags flags = (SecCSFlags) (kSecCSDefaultFlags | kSecCSCheckAllArchitectures | kSecCSCheckNestedCode);
@@ -291,7 +291,7 @@ EXPORT OSErr HandleInitEvent(const AppleEvent* ev, AppleEvent* reply, long refco
 #else
         NSURL* totalFinderBundleURL = [NSURL fileURLWithPath:totalFinderBundlePath];
         static CFStringRef injectorRequirement = CFSTR("anchor apple generic and identifier com.binaryage.totalfinder and certificate leaf[subject.CN] = \"Developer ID Application: BinaryAge Limited\"");
-        NSString* signatureError = checkSignature((__bridge CFURLRef)totalFinderBundleURL, injectorRequirement, reply);
+        NSString* signatureError = checkSignature((__bridge CFURLRef)totalFinderBundleURL, injectorRequirement);
         if (signatureError) {
           reportError(reply, [NSString stringWithFormat:@"Invalid code signature of '%@'.\n%@", totalFinderBundlePath, signatureError]);
           return 14;
