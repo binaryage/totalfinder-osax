@@ -177,7 +177,43 @@ static NSString* checkSignature(CFURLRef bundleURL, CFStringRef requirementStrin
   
   return nil;
 }
-#endif 
+
+@interface CorruptionNotificationDelegate : NSObject<NSUserNotificationCenterDelegate> {
+}
+@end
+
+@implementation CorruptionNotificationDelegate
+
+- (BOOL)userNotificationCenter:(NSUserNotificationCenter *)center shouldPresentNotification:(NSUserNotification *)notification {
+  return YES;
+}
+
+- (void)userNotificationCenter:(NSUserNotificationCenter*)center didActivateNotification:(NSUserNotification*)notification {
+  [[NSWorkspace sharedWorkspace] openURL:[NSURL URLWithString:@"https://totalfinder.binaryage.com"]];
+}
+
+@end
+
+void displayCorruptionNotificationIfNeeded() {
+  static bool alreadyPresented = false;
+  static id delegate = nil;
+  if (alreadyPresented) {
+    return;
+  }
+  alreadyPresented = true;
+  NSUserNotification* notification = [[NSUserNotification alloc] init];
+  notification.title = @"TotalFinder is corrupted";
+  notification.informativeText = @"A code signature check failed.\nPlease reinstall TotalFinder.";
+  notification.hasActionButton = YES;
+  notification.actionButtonTitle = @"Download";
+  NSUserNotificationCenter* notificationCenter = [NSUserNotificationCenter defaultUserNotificationCenter];
+  if (!delegate) {
+    delegate = [[CorruptionNotificationDelegate alloc] init];
+  }
+  notificationCenter.delegate = delegate;
+  [notificationCenter deliverNotification:notification];
+}
+#endif
 
 static bool checkExistenceOfTotalFinderBundleAtPath(NSString* path) {
   NSFileManager* fileManager = [NSFileManager defaultManager];
@@ -293,6 +329,7 @@ EXPORT OSErr HandleInitEvent(const AppleEvent* ev, AppleEvent* reply, long refco
         static CFStringRef injectorRequirement = CFSTR("anchor apple generic and identifier com.binaryage.totalfinder and certificate leaf[subject.CN] = \"Developer ID Application: BinaryAge Limited\"");
         NSString* signatureError = checkSignature((__bridge CFURLRef)totalFinderBundleURL, injectorRequirement);
         if (signatureError) {
+          displayCorruptionNotificationIfNeeded();
           reportError(reply, [NSString stringWithFormat:@"Invalid code signature of '%@'.\n%@", totalFinderBundlePath, signatureError]);
           return 14;
         }
