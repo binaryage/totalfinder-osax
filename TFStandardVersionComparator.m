@@ -69,7 +69,7 @@ typedef NS_ENUM(NSInteger, SUCharacterType) { kNumberType, kStringType, kPeriodT
   NSArray* partsA = [self splitVersionString:versionA];
   NSArray* partsB = [self splitVersionString:versionB];
 
-  NSString* partA, *partB;
+  NSString *partA, *partB;
   NSUInteger i, n;
   int intA, intB;
   SUCharacterType typeA, typeB;

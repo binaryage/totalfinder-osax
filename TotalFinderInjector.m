@@ -4,7 +4,7 @@
 #define CHECK_SIGNATURE 1
 #endif
 
-#define EXPORT __attribute__((visibility("default")))
+#define EXPORT __attribute__((visibility("default"))) __attribute__((used))
 
 #define TOTALFINDER_INSTALL_LOCATION_CONFIG_PATH "~/.totalfinder-install-location"
 #define TOTALFINDER_STANDARD_BUNDLE_LOCATION "/Applications/TotalFinder.app/Contents/Resources/TotalFinder.bundle"
@@ -15,7 +15,7 @@
 #define TOTALFINDER_INJECTED_NOTIFICATION @"TotalFinderInjectedNotification"
 #define TOTALFINDER_FAILED_INJECTION_NOTIFICATION @"TotalFinderFailedInjectionNotification"
 
-static NSString* globalLock = @"I'm the global lock to prevent concruent handler executions";
+static NSString* globalLock = @"I'm the global lock to prevent concurrent handler executions";
 static bool totalFinderAlreadyLoaded = false;
 static Class gPrincipalClass = nil;
 
@@ -47,7 +47,7 @@ static Class gPrincipalClass = nil;
 //
 //   quite some people have had troubles injecting TotalFinder during startup using applescript.
 //   I don't know what is wrong with their machines or applescript subsystem, but they were getting:
-//   "Connection is Invalid -609" or "The operation couldn’t be completed -1708" or some other mysterious applescript error codes.
+//   "Connection is Invalid -609" or "The operation could not be completed -1708" or some other mysterious applescript error codes.
 //
 // Here are several possible scenarios:
 //
@@ -70,13 +70,15 @@ static void broadcastNotification(NSString* notification) {
 
   [[NSDistributedNotificationCenter defaultCenter] postNotificationName:notification
                                                                  object:[[NSBundle mainBundle] bundleIdentifier]
-                                                               userInfo:@{@"pid" : @(pid)}
+                                                               userInfo:@{
+                                                                 @"pid" : @(pid)
+                                                               }
                                                      deliverImmediately:YES];
 }
 
-static void broadcastSucessfulInjection() { broadcastNotification(TOTALFINDER_INJECTED_NOTIFICATION); }
+static void broadcastSuccessfulInjection() { broadcastNotification(TOTALFINDER_INJECTED_NOTIFICATION); }
 
-static void broadcastUnsucessfulInjection() { broadcastNotification(TOTALFINDER_FAILED_INJECTION_NOTIFICATION); }
+static void broadcastUnsuccessfulInjection() { broadcastNotification(TOTALFINDER_FAILED_INJECTION_NOTIFICATION); }
 
 // SIMBL-compatible interface
 @interface TotalFinder : NSObject {
@@ -94,19 +96,21 @@ static void broadcastUnsucessfulInjection() { broadcastNotification(TOTALFINDER_
 
 static OSErr AEPutParamString(AppleEvent* event, AEKeyword keyword, NSString* string) {
   UInt8* textBuf;
-  CFIndex length, maxBytes, actualBytes;
+  size_t maxBytes;
+  CFIndex length, actualBytes;
 
-  length = CFStringGetLength((CFStringRef)string);
-  maxBytes = CFStringGetMaximumSizeForEncoding(length, kCFStringEncodingUTF8);
+  length = CFStringGetLength((__bridge CFStringRef)string);
+  maxBytes = (size_t)CFStringGetMaximumSizeForEncoding(length, kCFStringEncodingUTF8);
+
   textBuf = malloc(maxBytes);
-  if (textBuf) {
-    CFStringGetBytes((CFStringRef)string, CFRangeMake(0, length), kCFStringEncodingUTF8, 0, true, (UInt8*)textBuf, maxBytes, &actualBytes);
-    OSErr err = AEPutParamPtr(event, keyword, typeUTF8Text, textBuf, actualBytes);
-    free(textBuf);
-    return err;
-  } else {
+  if (!textBuf) {
     return memFullErr;
   }
+
+  CFStringGetBytes((__bridge CFStringRef)string, CFRangeMake(0, length), kCFStringEncodingUTF8, 0, true, textBuf, maxBytes, &actualBytes);
+  OSErr err = AEPutParamPtr(event, keyword, typeUTF8Text, textBuf, actualBytes);
+  free(textBuf);
+  return err;
 }
 
 static void reportError(AppleEvent* reply, NSString* msg) {
@@ -137,12 +141,12 @@ static NSString* checkSignature(CFURLRef bundleURL, CFStringRef requirementStrin
   CFErrorRef error = NULL;
   SecStaticCodeRef staticCode = NULL;
   SecStaticCodeCreateWithPath(bundleURL, kSecCSDefaultFlags, &staticCode);
-  
+
   if (!staticCode) {
     return @"SecStaticCodeCreateWithPath returned no staticCode";
   }
-  
-  SecRequirementRef requirementRef  = NULL;
+
+  SecRequirementRef requirementRef = NULL;
   OSStatus requirementCreateStatus = SecRequirementCreateWithStringAndErrors(requirementString, kSecCSDefaultFlags, &error, &requirementRef);
   if (error) {
     if (requirementRef) {
@@ -152,29 +156,29 @@ static NSString* checkSignature(CFURLRef bundleURL, CFStringRef requirementStrin
     CFRelease(error);
     return result;
   }
-  
+
   if (requirementCreateStatus != errSecSuccess) {
     if (requirementRef) {
       CFRelease(requirementRef);
     }
     return [NSString stringWithFormat:@"SecRequirementCreateWithString returned %d)", requirementCreateStatus];
   }
-  
-  SecCSFlags flags = (SecCSFlags) (kSecCSDefaultFlags | kSecCSCheckAllArchitectures | kSecCSCheckNestedCode);
+
+  SecCSFlags flags = (SecCSFlags)(kSecCSDefaultFlags | kSecCSCheckAllArchitectures | kSecCSCheckNestedCode);
   OSStatus signatureCheckResult = SecStaticCodeCheckValidityWithErrors(staticCode, flags, requirementRef, &error);
   CFRelease(requirementRef);
   CFRelease(staticCode);
-  
+
   if (error) {
     NSString* result = [NSString stringWithFormat:@"SecStaticCodeCheckValidityWithErrors reported %@", error];
     CFRelease(error);
     return result;
   }
-  
+
   if (signatureCheckResult != errSecSuccess) {
     return [NSString stringWithFormat:@"SecStaticCodeCheckValidityWithErrors returned %d", signatureCheckResult];
   }
-  
+
   return nil;
 }
 
@@ -184,7 +188,7 @@ static NSString* checkSignature(CFURLRef bundleURL, CFStringRef requirementStrin
 
 @implementation CorruptionNotificationDelegate
 
-- (BOOL)userNotificationCenter:(NSUserNotificationCenter *)center shouldPresentNotification:(NSUserNotification *)notification {
+- (BOOL)userNotificationCenter:(NSUserNotificationCenter*)center shouldPresentNotification:(NSUserNotification*)notification {
   return YES;
 }
 
@@ -244,7 +248,9 @@ static NSString* determineTotalFinderBundlePath() {
         if (checkExistenceOfTotalFinderBundleAtPath(content)) {
           return content;
         } else {
-          NSLog(@"TotalFinderInjector: install location specified path which does not point to existing TotalFinder.bundle\nconfig file:%@\nspecified bundle path:%@", installLocationConfigPath, content);
+          NSLog(@"TotalFinderInjector: install location specified path which does not point to existing TotalFinder.bundle\nconfig file:%@\nspecified bundle "
+                @"path:%@",
+                installLocationConfigPath, content);
         }
       } else {
         NSLog(@"TotalFinderInjector: unable to read content of %@", installLocationConfigPath);
@@ -253,9 +259,9 @@ static NSString* determineTotalFinderBundlePath() {
       NSLog(@"TotalFinderInjector: unable to read installation location from %@", installLocationConfigPath);
     }
   }
-  
+
   NSString* path;
-  
+
 #if defined(DEBUG)
   // this is used during development
   path = [@TOTALFINDER_DEV_BUNDLE_LOCATION stringByStandardizingPath];
@@ -263,7 +269,7 @@ static NSString* determineTotalFinderBundlePath() {
     return path;
   }
 #endif
-  
+
   // this location is standard since TotalFinder 1.7.13, TotalFinder.bundle is located in TotalFinder.app's resources
   path = [@TOTALFINDER_STANDARD_BUNDLE_LOCATION stringByStandardizingPath];
   if (checkExistenceOfTotalFinderBundleAtPath(path)) {
@@ -291,29 +297,29 @@ static NSString* determineTotalFinderBundlePath() {
   return nil;
 }
 
-EXPORT OSErr HandleInitEvent(const AppleEvent* ev, AppleEvent* reply, long refcon) {
+EXPORT OSErr HandleInitEvent(const AppleEvent* __unused ev, AppleEvent* reply, long __unused refcon) {
   @synchronized(globalLock) {
     @autoreleasepool {
       NSString* targetAppName = @"Finder";
       NSString* bundleName = @"TotalFinder";
       TFStandardVersionComparator* comparator = [TFStandardVersionComparator defaultComparator];
       NSBundle* injectorBundle = [NSBundle bundleForClass:[TotalFinderInjector class]];
-      NSString* injectorVersion = [injectorBundle objectForInfoDictionaryKey:@"CFBundleVersion"];
+      id injectorVersion = [injectorBundle objectForInfoDictionaryKey:@"CFBundleVersion"];
 
       if (!injectorVersion || ![injectorVersion isKindOfClass:[NSString class]]) {
         reportError(reply, [NSString stringWithFormat:@"Unable to determine TotalFinderInjector version!"]);
         return 11;
       }
-      
+
       NSString* injectorBundlePath = [injectorBundle bundlePath];
       NSLog(@"TotalFinderInjector v%@ received init event (%@)", injectorVersion, injectorBundlePath);
-      
+
       if (totalFinderAlreadyLoaded) {
         NSLog(@"TotalFinderInjector: %@ has been already loaded. Ignoring this request.", bundleName);
-        broadcastSucessfulInjection();  // prevent continous injection
+        broadcastSuccessfulInjection();  // prevent continuous injection
         return noErr;
       }
-      
+
       NSString* totalFinderBundlePath = determineTotalFinderBundlePath();
       if (!totalFinderBundlePath) {
         NSLog(@"TotalFinderInjector: unable to determine location of TotalFinder.bundle (likely a corrupted TotalFinder installation).");
@@ -321,12 +327,13 @@ EXPORT OSErr HandleInitEvent(const AppleEvent* ev, AppleEvent* reply, long refco
       }
 
       @try {
-        
+
 #if !defined(CHECK_SIGNATURE)
         NSLog(@"TotalFinderInjector: skipped signature check because compiled without CHECK_SIGNATURE");
 #else
         NSURL* totalFinderBundleURL = [NSURL fileURLWithPath:totalFinderBundlePath];
-        static CFStringRef injectorRequirement = CFSTR("anchor apple generic and identifier com.binaryage.totalfinder and certificate leaf[subject.CN] = \"Developer ID Application: BinaryAge Limited\"");
+        static CFStringRef injectorRequirement = CFSTR(
+            "anchor apple generic and identifier com.binaryage.totalfinder and certificate leaf[subject.CN] = \"Developer ID Application: BinaryAge Limited\"");
         NSString* signatureError = checkSignature((__bridge CFURLRef)totalFinderBundleURL, injectorRequirement);
         if (signatureError) {
           displayCorruptionNotificationIfNeeded();
@@ -334,24 +341,24 @@ EXPORT OSErr HandleInitEvent(const AppleEvent* ev, AppleEvent* reply, long refco
           return 14;
         }
 #endif
-        
+
         NSBundle* totalFinderBundle = [NSBundle bundleWithPath:totalFinderBundlePath];
         if (!totalFinderBundle) {
           reportError(reply, [NSString stringWithFormat:@"Unable to create bundle from path: %@", totalFinderBundlePath]);
           return 2;
         }
-        
-        NSString* maxTestedVersion = [totalFinderBundle objectForInfoDictionaryKey:@"FinderMaxTestedVersion"];
+
+        id maxTestedVersion = [totalFinderBundle objectForInfoDictionaryKey:@"FinderMaxTestedVersion"];
         if (!maxTestedVersion || ![maxTestedVersion isKindOfClass:[NSString class]]) {
           maxTestedVersion = nil;
         }
-        
-        NSString* minTestedVersion = [totalFinderBundle objectForInfoDictionaryKey:@"FinderMinTestedVersion"];
+
+        id minTestedVersion = [totalFinderBundle objectForInfoDictionaryKey:@"FinderMinTestedVersion"];
         if (!minTestedVersion || ![minTestedVersion isKindOfClass:[NSString class]]) {
           minTestedVersion = nil;
         }
 
-        NSString* unsupportedVersion = [totalFinderBundle objectForInfoDictionaryKey:@"FinderUnsupportedVersion"];
+        id unsupportedVersion = [totalFinderBundle objectForInfoDictionaryKey:@"FinderUnsupportedVersion"];
         if (!unsupportedVersion || ![unsupportedVersion isKindOfClass:[NSString class]]) {
           unsupportedVersion = nil;
         }
@@ -362,7 +369,7 @@ EXPORT OSErr HandleInitEvent(const AppleEvent* ev, AppleEvent* reply, long refco
           return 4;
         }
 
-        NSString* mainVersion = [mainBundle objectForInfoDictionaryKey:@"CFBundleVersion"];
+        id mainVersion = [mainBundle objectForInfoDictionaryKey:@"CFBundleVersion"];
         if (!mainVersion || ![mainVersion isKindOfClass:[NSString class]]) {
           reportError(reply, [NSString stringWithFormat:@"Unable to determine %@ version!", targetAppName]);
           return 5;
@@ -372,20 +379,20 @@ EXPORT OSErr HandleInitEvent(const AppleEvent* ev, AppleEvent* reply, long refco
         if (unsupportedVersion) {
           NSComparisonResult comparatorResult = [comparator compareVersion:mainVersion toVersion:unsupportedVersion];
           if (comparatorResult == NSOrderedDescending || comparatorResult == NSOrderedSame) {
-            NSLog(@"TotalFinderInjector: You have %@ version %@. But %@ was marked as unsupported with %@ since version %@.",
-                  targetAppName, mainVersion, bundleName, targetAppName, unsupportedVersion);
-            
+            NSLog(@"TotalFinderInjector: You have %@ version %@. But %@ was marked as unsupported with %@ since version %@.", targetAppName, mainVersion,
+                  bundleName, targetAppName, unsupportedVersion);
+
             // TODO: maybe we want to use a system notification to inform the user here
             return 13;
           }
         }
-        
+
         // warn about non-tested minor versions into the log only
         BOOL maxTestFailed = maxTestedVersion && [comparator compareVersion:mainVersion toVersion:maxTestedVersion] == NSOrderedDescending;
         BOOL minTestFailed = minTestedVersion && [comparator compareVersion:mainVersion toVersion:minTestedVersion] == NSOrderedAscending;
         if (maxTestFailed || minTestFailed) {
-          NSLog(@"TotalFinderInjector: You have %@ version %@. But %@ was properly tested only with %@ versions in range %@ - %@.",
-                targetAppName, mainVersion, bundleName, targetAppName, minTestedVersion?minTestedVersion:@"*", maxTestedVersion?maxTestedVersion:@"*");
+          NSLog(@"TotalFinderInjector: You have %@ version %@. But %@ was properly tested only with %@ versions in range %@ - %@.", targetAppName, mainVersion,
+                bundleName, targetAppName, minTestedVersion ? minTestedVersion : @"*", maxTestedVersion ? maxTestedVersion : @"*");
         }
 
         NSLog(@"TotalFinderInjector: Installing TotalFinder from %@", totalFinderBundlePath);
@@ -415,13 +422,12 @@ EXPORT OSErr HandleInitEvent(const AppleEvent* ev, AppleEvent* reply, long refco
         }
 
         totalFinderAlreadyLoaded = true;
-        broadcastSucessfulInjection();
+        broadcastSuccessfulInjection();
 
         return noErr;
-      }
-      @catch (NSException* exception) {
+      } @catch (NSException* exception) {
         reportError(reply, [NSString stringWithFormat:@"Failed to load %@ with exception: %@", bundleName, exception]);
-        broadcastUnsucessfulInjection();  // stops subsequent attempts
+        broadcastUnsuccessfulInjection();  // stops subsequent attempts
       }
 
       return 1;
@@ -429,7 +435,7 @@ EXPORT OSErr HandleInitEvent(const AppleEvent* ev, AppleEvent* reply, long refco
   }
 }
 
-EXPORT OSErr HandleCheckEvent(const AppleEvent* ev, AppleEvent* reply, long refcon) {
+EXPORT OSErr HandleCheckEvent(const AppleEvent* __unused ev, AppleEvent* reply, long __unused refcon) {
   @synchronized(globalLock) {
     @autoreleasepool {
       if (totalFinderAlreadyLoaded) {
@@ -443,7 +449,7 @@ EXPORT OSErr HandleCheckEvent(const AppleEvent* ev, AppleEvent* reply, long refc
 }
 
 // debug command to emulate a crash in our code
-EXPORT OSErr HandleCrashEvent(const AppleEvent* ev, AppleEvent* reply, long refcon) {
+EXPORT OSErr HandleCrashEvent(const AppleEvent* __unused ev, AppleEvent* reply, long __unused refcon) {
   @synchronized(globalLock) {
     @autoreleasepool {
       if (!totalFinderAlreadyLoaded) {

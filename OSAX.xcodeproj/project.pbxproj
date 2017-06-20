@@ -24,7 +24,7 @@
 		D6ACBE9F117B7D5600F6691C /* TFVersionComparisonProtocol.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TFVersionComparisonProtocol.h; sourceTree = "<group>"; };
 		D6ACBEA0117B7D5600F6691C /* TFStandardVersionComparator.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TFStandardVersionComparator.m; sourceTree = "<group>"; };
 		D6ACBEA1117B7D5600F6691C /* TFStandardVersionComparator.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TFStandardVersionComparator.h; sourceTree = "<group>"; };
-		D6ACBEA4117B7D6100F6691C /* TotalFinderInjector.sdef */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; path = TotalFinderInjector.sdef; sourceTree = "<group>"; };
+		D6ACBEA4117B7D6100F6691C /* TotalFinderInjector.sdef */ = {isa = PBXFileReference; fileEncoding = 1; lastKnownFileType = text.xml; path = TotalFinderInjector.sdef; sourceTree = "<group>"; };
 		D6D55BAA1B0C4D1700227B08 /* OSAX_ReleaseLogging_TotalFinder.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; name = OSAX_ReleaseLogging_TotalFinder.xcconfig; path = OSAX.xcconfigs/OSAX_ReleaseLogging_TotalFinder.xcconfig; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
