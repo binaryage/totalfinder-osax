@@ -183,7 +183,6 @@
 			baseConfigurationReference = D618B015195996BD004F2F20 /* OSAX_Debug_TotalFinder.xcconfig */;
 			buildSettings = {
 				PRODUCT_BUNDLE_IDENTIFIER = com.binaryage.totalfinder.injector;
-				SDKROOT = macosx;
 			};
 			name = Debug;
 		};
@@ -192,7 +191,6 @@
 			baseConfigurationReference = D618B016195996BD004F2F20 /* OSAX_Release_TotalFinder.xcconfig */;
 			buildSettings = {
 				PRODUCT_BUNDLE_IDENTIFIER = com.binaryage.totalfinder.injector;
-				SDKROOT = macosx;
 			};
 			name = Release;
 		};
@@ -221,7 +219,6 @@
 			baseConfigurationReference = D6D55BAA1B0C4D1700227B08 /* OSAX_ReleaseLogging_TotalFinder.xcconfig */;
 			buildSettings = {
 				PRODUCT_BUNDLE_IDENTIFIER = com.binaryage.totalfinder.injector;
-				SDKROOT = macosx;
 			};
 			name = ReleaseLogging;
 		};
