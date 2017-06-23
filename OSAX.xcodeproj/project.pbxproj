@@ -19,6 +19,7 @@
 		D60A992314CE37030061AD6D /* TotalFinder.xaso */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = TotalFinder.xaso; sourceTree = BUILT_PRODUCTS_DIR; };
 		D618B015195996BD004F2F20 /* OSAX_Debug_TotalFinder.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; name = OSAX_Debug_TotalFinder.xcconfig; path = OSAX.xcconfigs/OSAX_Debug_TotalFinder.xcconfig; sourceTree = "<group>"; };
 		D618B016195996BD004F2F20 /* OSAX_Release_TotalFinder.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; name = OSAX_Release_TotalFinder.xcconfig; path = OSAX.xcconfigs/OSAX_Release_TotalFinder.xcconfig; sourceTree = "<group>"; };
+		D64491D61EFDC95C00CCF8EC /* TotalFinder.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = TotalFinder.pch; sourceTree = "<group>"; };
 		D6ACBE9E117B7D5600F6691C /* TotalFinderInjector.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = TotalFinderInjector.mm; sourceTree = "<group>"; };
 		D6ACBE9F117B7D5600F6691C /* TFVersionComparisonProtocol.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TFVersionComparisonProtocol.h; sourceTree = "<group>"; };
 		D6ACBEA0117B7D5600F6691C /* TFStandardVersionComparator.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = TFStandardVersionComparator.mm; sourceTree = "<group>"; };
@@ -41,6 +42,7 @@
 		089C166AFE841209C02AAC07 /* OSAX */ = {
 			isa = PBXGroup;
 			children = (
+				D64491D61EFDC95C00CCF8EC /* TotalFinder.pch */,
 				D672258517FA6D3900D3ACEA /* Configs */,
 				08FB77AFFE84173DC02AAC07 /* Source */,
 				089C167CFE841241C02AAC07 /* Resources */,

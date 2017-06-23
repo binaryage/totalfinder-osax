@@ -6,7 +6,6 @@
 // Copyright 2007 Andy Matuschak. All rights reserved.
 //
 
-#import <Cocoa/Cocoa.h>
 #import "TFStandardVersionComparator.h"
 
 @implementation TFStandardVersionComparator

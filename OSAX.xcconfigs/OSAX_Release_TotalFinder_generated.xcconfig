@@ -81,15 +81,13 @@ ENABLE_STRICT_OBJC_MSGSEND = YES;
 COMBINE_HIDPI_IMAGES = YES
 DEBUG_INFORMATION_FORMAT = dwarf-with-dsym
 INFOPLIST_FILE = TotalFinder-Info.plist
-GCC_PREFIX_HEADER = TotalFinder-Prefix.pch
+GCC_PREFIX_HEADER = TotalFinder.pch
 //
 // Release mode additions to TotalFinder configs
 //
 // we don't want OSAX subsystem to treat our intermediate build folder as installed osax in the system
 // they use SpotLight or some similar search mechanism to look for all .osax in the system
 WRAPPER_EXTENSION = xaso
-GCC_PRECOMPILE_PREFIX_HEADER = NO
-GCC_PREFIX_HEADER =
 GCC_SYMBOLS_PRIVATE_EXTERN = YES
 //
 // Dynamic configuration collected from all sections above

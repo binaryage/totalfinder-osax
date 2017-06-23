@@ -1,4 +1,3 @@
-#import <Cocoa/Cocoa.h>
 #import "TFStandardVersionComparator.h"
 
 #if !defined(DEBUG)

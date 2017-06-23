@@ -6,6 +6,3 @@
 #include "OSAX_Debug_TotalFinder_generated.xcconfig"
 
 // here you can follow with your custom settings overrides if needed
-
-
-// SDKROOT = macosx
