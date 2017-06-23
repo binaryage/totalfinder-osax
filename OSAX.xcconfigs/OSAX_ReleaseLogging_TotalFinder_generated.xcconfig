@@ -88,29 +88,12 @@ GCC_PREFIX_HEADER = TotalFinder-Prefix.pch
 // we don't want OSAX subsystem to treat our intermediate build folder as installed osax in the system
 // they use SpotLight or some similar search mechanism to look for all .osax in the system
 WRAPPER_EXTENSION = xaso
-GCC_SYMBOLS_PRIVATE_EXTERN = YES
-//
-// Base configuration for all TotalTerminal projects
-//
-MACOSX_DEPLOYMENT_TARGET = 10.9
-SDKROOT = macosx
-CLANG_CXX_LIBRARY = libc++
-CLANG_CXX_LANGUAGE_STANDARD = c++0x
-CLANG_ENABLE_MODULES = YES
-GCC_WARN_UNINITIALIZED_AUTOS = YES
-GCC_WARN_UNUSED_VARIABLE = YES
-CLANG_WARN_EMPTY_BODY = YES
-CLANG_WARN__DUPLICATE_METHOD_MATCH = YES
-GCC_WARN_ABOUT_RETURN_TYPE = YES
-COMBINE_HIDPI_IMAGES = YES
-DEBUG_INFORMATION_FORMAT = dwarf-with-dsym
-INFOPLIST_FILE = TotalFinder-Info.plist
 GCC_PRECOMPILE_PREFIX_HEADER = NO
-GCC_PREFIX_HEADER = TotalFinder-Prefix.pch
-GCC_INCREASE_PRECOMPILED_HEADER_SHARING = NO
+GCC_PREFIX_HEADER =
+GCC_SYMBOLS_PRIVATE_EXTERN = YES
 //
 // Dynamic configuration collected from all sections above
 //
-WARNING_CFLAGS = -Wextra -Wself-assign -Wno-gcc-compat -Wno-unused-parameter -Wstrict-prototypes -Wunreachable-code -Wunused-member-function -Wuninitialized -Wsuper-class-method-mismatch -Warc -Warc-retain-cycles -Warc-unsafe-retained-assign -Warc-non-pod-memaccess -Wbind-to-temporary-copy -Wno-unused-variable -Wthread-safety -Wthread-safety-beta -Wthread-safety -Wthread-safety-beta
+WARNING_CFLAGS = -Wextra -Wself-assign -Wno-gcc-compat -Wno-unused-parameter -Wstrict-prototypes -Wunreachable-code -Wunused-member-function -Wuninitialized -Wsuper-class-method-mismatch -Warc -Warc-retain-cycles -Warc-unsafe-retained-assign -Warc-non-pod-memaccess -Wbind-to-temporary-copy -Wno-unused-variable -Wthread-safety -Wthread-safety-beta
 GCC_PREPROCESSOR_DEFINITIONS = NDEBUG=1 NS_BLOCK_ASSERTIONS=1 LOGGING_SUPPORT=1 LOGGING_TO_FILE=1
-OTHER_LDFLAGS = -undefined dynamic_lookup -headerpad_max_install_names -undefined dynamic_lookup -headerpad_max_install_names
+OTHER_LDFLAGS = -undefined dynamic_lookup -headerpad_max_install_names
