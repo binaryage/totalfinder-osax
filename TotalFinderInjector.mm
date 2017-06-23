@@ -1,10 +1,11 @@
+#import <Cocoa/Cocoa.h>
 #import "TFStandardVersionComparator.h"
 
 #if !defined(DEBUG)
 #define CHECK_SIGNATURE 1
 #endif
 
-#define EXPORT __attribute__((visibility("default"))) __attribute__((used))
+#define EXPORT extern "C" __attribute__((visibility("default"))) __attribute__((used))
 
 #define TOTALFINDER_INSTALL_LOCATION_CONFIG_PATH "~/.totalfinder-install-location"
 #define TOTALFINDER_STANDARD_BUNDLE_LOCATION "/Applications/TotalFinder.app/Contents/Resources/TotalFinder.bundle"
@@ -102,7 +103,7 @@ static OSErr AEPutParamString(AppleEvent* event, AEKeyword keyword, NSString* st
   length = CFStringGetLength((__bridge CFStringRef)string);
   maxBytes = (size_t)CFStringGetMaximumSizeForEncoding(length, kCFStringEncodingUTF8);
 
-  textBuf = malloc(maxBytes);
+  textBuf = (UInt8*)malloc(maxBytes);
   if (!textBuf) {
     return memFullErr;
   }
