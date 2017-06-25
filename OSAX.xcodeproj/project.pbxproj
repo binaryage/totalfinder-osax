@@ -167,7 +167,6 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = D618B015195996BD004F2F20 /* OSAX_Debug_TotalFinder.xcconfig */;
 			buildSettings = {
-				PRODUCT_BUNDLE_IDENTIFIER = com.binaryage.totalfinder.injector;
 			};
 			name = Debug;
 		};
@@ -175,7 +174,6 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = D618B016195996BD004F2F20 /* OSAX_Release_TotalFinder.xcconfig */;
 			buildSettings = {
-				PRODUCT_BUNDLE_IDENTIFIER = com.binaryage.totalfinder.injector;
 			};
 			name = Release;
 		};
@@ -203,7 +201,6 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = D6D55BAA1B0C4D1700227B08 /* OSAX_ReleaseLogging_TotalFinder.xcconfig */;
 			buildSettings = {
-				PRODUCT_BUNDLE_IDENTIFIER = com.binaryage.totalfinder.injector;
 			};
 			name = ReleaseLogging;
 		};
