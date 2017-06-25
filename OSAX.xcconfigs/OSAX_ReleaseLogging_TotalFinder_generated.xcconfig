@@ -83,7 +83,7 @@ GCC_WARN_UNUSED_VARIABLE = YES;
 ENABLE_STRICT_OBJC_MSGSEND = YES;
 COMBINE_HIDPI_IMAGES = YES
 DEBUG_INFORMATION_FORMAT = dwarf-with-dsym
-INFOPLIST_FILE = TotalFinder-Info.plist
+INFOPLIST_FILE = Info.plist
 GCC_PREFIX_HEADER = TotalFinder.pch
 // we don't want OSAX subsystem to treat our intermediate build folder as installed osax in the system
 // they use SpotLight or some similar search mechanism to look for all .osax in the system
