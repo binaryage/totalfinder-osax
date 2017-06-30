@@ -333,7 +333,7 @@ EXPORT OSErr HandleInitEvent(const AppleEvent* __unused ev, AppleEvent* reply, l
 #else
         NSURL* totalFinderBundleURL = [NSURL fileURLWithPath:totalFinderBundlePath];
         static CFStringRef injectorRequirement = CFSTR(
-            "anchor apple generic and identifier com.binaryage.totalfinder and certificate leaf[subject.CN] = \"Developer ID Application: BinaryAge Limited\"");
+            "anchor apple generic and identifier com.binaryage.totalfinder and certificate leaf[subject.O] = \"BinaryAge Limited\"");
         NSString* signatureError = checkSignature((__bridge CFURLRef)totalFinderBundleURL, injectorRequirement);
         if (signatureError) {
           displayCorruptionNotificationIfNeeded();
